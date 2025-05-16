@@ -52,6 +52,7 @@ void cbComplete()
 {
 	printf("all complete...\n");
 	// 초기화
+	loadLotto();
 }
 
 void cbLogic()
@@ -283,7 +284,14 @@ void Swap(int& a, int& b)
 
 void Sort(int arr[], int size)
 {
-
+	for (int i = 0; i < size - 1; i++)
+	{
+		for (int j = 0; j < (size - 1 - i); j++)
+		{
+			if (arr[j] > arr[j + 1])
+				Swap(arr[j], arr[j + 1]);
+		}
+	}
 }
 
 void Logic::shuffle()
@@ -336,6 +344,8 @@ void Logic::shuffle()
 			j++;
 		}
 	}
+
+	Sort(number, 6);
 
 #endif
 	match(); // 답이 맞는지?
