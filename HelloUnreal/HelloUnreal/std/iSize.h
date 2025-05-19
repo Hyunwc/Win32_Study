@@ -1,8 +1,13 @@
 #pragma once
 
+#include "iPoint.h"
+
 struct iSize
 {
 	float width, height;
+
+	iSize& operator +=(const iPoint& p);
+	iSize& operator +=(const iSize& s);
 
 	iSize& operator *=(float f);
 };

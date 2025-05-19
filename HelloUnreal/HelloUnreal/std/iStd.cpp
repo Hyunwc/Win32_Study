@@ -189,3 +189,32 @@ iPoint easeOut(iPoint s, iPoint e, float rate)
 	return iPointZero;
 }
 
+void move(iPoint* cp, const iPoint* tp, const iPoint& mp)
+{
+	if (cp->x < tp->x)
+	{
+		cp->x += mp.x;
+		if (cp->x > tp->x)
+			cp->x = tp->x;
+	}
+	else if (cp->x > tp->x)
+	{
+		cp->x += mp.x;
+		if (cp->x < tp->x)
+			cp->x = tp->x;
+	}
+
+	if (cp->y < tp->y)
+	{
+		cp->y += mp.y;
+		if (cp->y > tp->y)
+			cp->y = tp->y;
+	}
+	else if (cp->y > tp->y)
+	{
+		cp->y += mp.y;
+		if (cp->y < tp->y)
+			cp->y = tp->y;
+	}
+}
+

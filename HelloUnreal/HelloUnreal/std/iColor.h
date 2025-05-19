@@ -21,3 +21,8 @@ struct iColor4f
 iColor4b iColor4bMake(byte r, byte g, byte b, byte a);
 iColor4f iColor4fMake(float r, float g, float b, float a);
 
+#define iColor4fRed iColor4fMake(1, 0, 0, 1)
+#define iColor4fGreen iColor4fMake(0, 1, 0, 1)
+#define iColor4fBlue iColor4fMake(0, 0, 1, 1)
+#define iColor4fWhite iColor4fMake(1, 1, 1, 1)
+#define iColor4fBlack iColor4fMake(0, 0, 0, 1)

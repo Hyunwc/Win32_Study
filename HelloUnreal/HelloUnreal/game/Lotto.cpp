@@ -48,34 +48,12 @@ void drawLotto(float dt)
 	result->paint(dt);
 }
 
-void cbComplete()
-{
-	printf("all complete...\n");
-	// 초기화
-	loadLotto();
-}
-
-void cbLogic()
-{
-	printf("cbLogic\n");
-	gachaIndex++;
-	if (gachaIndex < gachaNum)
-	{
-		logic[gachaIndex]->start(cbLogic);
-	}
-	else// if (gachaIndex == gachaNum)
-	{
-		// Result
-		result->start(cbComplete);
-	}
-}
-
-void cbBtn()
-{
-	printf("cbBtn\n");
-	// 버튼을 눌렀으니 start
-	logic[0]->start(cbLogic);
-}
+//void cbBtn()
+//{
+//	printf("cbBtn\n");
+//	// 버튼을 눌렀으니 start
+//	logic[0]->start(cbLogic);
+//}
 
 void keyLotto(iKeyStat stat, iPoint point)
 {
@@ -85,7 +63,7 @@ void keyLotto(iKeyStat stat, iPoint point)
 		printf("gachaNum = %d", gachaNum);
 		gachaIndex = 0;
 		//tp = point;
-		btn->start(0, cbBtn);
+		btn->start(Button::cb);
 	}
 	else if (stat == iKeyStatMoved)
 	{
@@ -101,15 +79,33 @@ void keyLotto(iKeyStat stat, iPoint point)
 }
 
 // -----------------------------------------
-// Button
+// Lotto
 // -----------------------------------------
 
-Button::Button(iPoint position)
+Lotto::Lotto(iPoint position)
 {
 	delta = 0.0f;
 	this->position = position;
 	method = NULL;
+}
 
+Lotto::~Lotto()
+{
+	// TODO someting..
+}
+
+void Lotto::start(METHOD_VOID cb)
+{
+	delta = 0.000001f;
+	method = cb;
+}
+
+// -----------------------------------------
+// Button
+// -----------------------------------------
+
+Button::Button(iPoint position) : Lotto(position)
+{
 	size = iSizeMake(140, 35);
 	selected = false;
 }
@@ -117,6 +113,13 @@ Button::Button(iPoint position)
 Button::~Button()
 {
 	// TODO someting..
+}
+
+void Button::cb()
+{
+	printf("Button::cb\n");
+	// 버튼을 눌렀으니 start
+	logic[0]->start(Logic::cb);
 }
 
 #define buttonAni 2.0f
@@ -157,31 +160,37 @@ void Button::paint(float dt)
 	drawString(position.x, position.y, L"로또시작");
 }
 
-void Button::start(int money, METHOD_VOID cbGacha)
-{
-	// 개발환경에서 0보다 크면서 가장 작은 값. 소숫점 6자리
-	delta = 0.000001f;
-	method = cbGacha;
-}
-
 // -----------------------------------------
 // Logic
 // -----------------------------------------
 
-Logic::Logic(iPoint position)
+Logic::Logic(iPoint position) : Lotto(position)
 {
-	delta = 0.0f;
-	this->position = position;
-	method = NULL;
 	for (int i = 0; i < 6; i++)
+	{
 		number[i] = 0;
-
-	//srand(time(NULL));
+		right[i] = false;
+	}
 }
 
 Logic::~Logic()
 {
 	// TODO Someting...
+}
+
+void Logic::cb()
+{
+	printf("cbLogic\n");
+	gachaIndex++;
+	if (gachaIndex < gachaNum)
+	{
+		logic[gachaIndex]->start(Logic::cb);
+	}
+	else// if (gachaIndex == gachaNum)
+	{
+		// Result
+		result->start(Result::cb);
+	}
 }
 
 void Logic::paint(float dt)
@@ -269,12 +278,6 @@ void Logic::paint(float dt)
 	// 숫자 노출O + 당첨 여부O or X
 }
 
-void Logic::start(METHOD_VOID cbResult)
-{
-	delta = 0.000001f;
-	method = cbResult;
-}
-
 void Swap(int& a, int& b)
 {
 	int temp = a;
@@ -282,6 +285,7 @@ void Swap(int& a, int& b)
 	b = a;
 }
 
+// 버블 정렬
 void Sort(int arr[], int size)
 {
 	for (int i = 0; i < size - 1; i++)
@@ -373,16 +377,21 @@ void Logic::match()
 	printf("right number = %d\n", n);
 }
 
-Result::Result(iPoint position)
+Result::Result(iPoint position) : Lotto(position)
 {
-	delta = 0.0f;
-	this->position = position;
-	method = NULL;
+
 }
 
 Result::~Result()
 {
 	// TODO something..
+}
+
+void Result::cb()
+{
+	printf("all complete...\n");
+	// 초기화
+	loadLotto();
 }
 
 void Result::paint(float dt)
@@ -407,12 +416,6 @@ void Result::paint(float dt)
 	setStringRGBA(1, 1, 1, a);
 	drawString(position.x, position.y, L"뽑기완료");
 	setStringRGBA(1, 1, 1, 1);
-}
-
-void Result::start(METHOD_VOID cbComplete)
-{
-	delta = 0.000001f;
-	method = cbComplete;
 }
 
 

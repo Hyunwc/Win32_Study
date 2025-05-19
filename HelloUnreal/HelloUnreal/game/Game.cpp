@@ -7,18 +7,27 @@ iPoint tp;
 float takeTime;
 
 #include "Lotto.h"
+#include "Tripple.h"
 
 void loadGame()
 {
 	me = iRectMake(0, 0, 50, 50);
 	takeTime = 0.0f;
 
-	loadLotto();
+#if 0
+	//loadLotto();
+#else
+	loadTripple();
+#endif
 }
 
 void freeGame()
 {
-	freeLotto();
+#if 0
+	//freeLotto();
+#else
+	freeTripple();
+#endif
 }
 
 void drawGame(float dt)
@@ -26,8 +35,11 @@ void drawGame(float dt)
 	setRGBA(0, 0, 0, 1);
 	clear();
 
-#if 1
+#if 0
 	drawLotto(dt);
+	return;
+#else
+	drawTripple(dt);
 	return;
 #endif
 	drawString(300, 100, L"Hi");
@@ -97,9 +109,14 @@ void drawGame(float dt)
 
 void keyGame(iKeyStat stat, iPoint point)
 {
+#if 0
 	keyLotto(stat, point);
 	return;
-
+#else
+	keyTripple(stat, point);
+	return;
+#endif
+	
 	if (stat == iKeyStatBegan)
 	{
 		tp = point;

@@ -12,6 +12,9 @@ using namespace Gdiplus;
 
 #include "iPoint.h"
 #include "iRect.h"
+#include "iColor.h"
+#include "iSize.h"
+#include "iString.h"
 
 enum iKeyStat
 {
@@ -71,3 +74,4 @@ iPoint easeln(iPoint s, iPoint e, float rate);
 float easeOut(float s, float e, float rate);
 iPoint easeOut(iPoint s, iPoint e, float rate);
 
+void move(iPoint* cp, const iPoint* tp, const iPoint& mp);
