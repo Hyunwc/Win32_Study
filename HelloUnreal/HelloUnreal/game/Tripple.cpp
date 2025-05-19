@@ -5,6 +5,8 @@
 
 Bot** bot;
 
+int order[] = { 0, 1, 2 };
+
 void loadTripple()
 {
 	bot = new Bot*[3];
@@ -23,11 +25,28 @@ void freeTripple()
 	delete bot;
 }
 
+void Shuffle(Bot* b0, Bot* b1, int idx1, int idx2)
+{
+	// 인자로 받은 포인터들의 좌표를 비교
+	if (b0->rt.origin.y + b0->rt.size.height >
+		b1->rt.origin.y + b1->rt.size.height)
+	{
+		int temp = order[idx1];
+		order[idx1] = order[idx2];
+		order[idx2] = temp;
+
+		Bot* b = bot[idx1];
+		bot[idx1] = bot[idx2];
+		bot[idx2] = b;
+	}
+}
+
 void drawTripple(float dt) 
 {
-	int order[] = {0, 1, 2};
-	// y기준으로 정렬?
-	Bot* b0 = bot[0], *b1 = bot[1];
+	Shuffle(bot[0], bot[1], 0, 1);
+	Shuffle(bot[0], bot[2], 0, 2);
+	Shuffle(bot[1], bot[2], 1, 2);
+	/*Bot* b0 = bot[0], *b1 = bot[1];
 	if (b0->rt.origin.y + b0->rt.size.height >
 		b1->rt.origin.y + b1->rt.size.height)
 	{
@@ -44,25 +63,25 @@ void drawTripple(float dt)
 		b1->rt.origin.y + b1->rt.size.height)
 	{
 		int t = order[0];
-		order[0] = order[1];
-		order[1] = t;
+		order[0] = order[2];
+		order[2] = t;
 
 		Bot* b = bot[0];
-		bot[0] = bot[1];
-		bot[1] = b;
+		bot[0] = bot[2];
+		bot[2] = b;
 	}
 	b0 = bot[1], b1 = bot[2];
 	if (b0->rt.origin.y + b0->rt.size.height >
 		b1->rt.origin.y + b1->rt.size.height)
 	{
-		int t = order[0];
-		order[0] = order[1];
-		order[1] = t;
+		int t = order[1];
+		order[1] = order[2];
+		order[2] = t;
 
-		Bot* b = bot[0];
-		bot[0] = bot[1];
-		bot[1] = b;
-	}
+		Bot* b = bot[1];
+		bot[1] = bot[2];
+		bot[2] = b;
+	}*/
 
 	for (int i = 0; i < 3; i++)
 		bot[order[i]]->paint(dt);
@@ -84,6 +103,8 @@ void keyTripple(iKeyStat stat, iPoint point)
 		break;
 	}
 }
+
+
 
 #else
 
@@ -242,6 +263,10 @@ void BotRed::paint(float dt)
 	Bot::paint(dt);
 }
 
+void BotRed::sort(Bot* b0, Bot* b1, int idx1, int idx2)
+{
+}
+
 BotGreen::BotGreen(iRect rt, iColor4f color, float speed) : Bot(rt, color)
 {
 	this->speed = speed;
@@ -275,6 +300,10 @@ void BotGreen::paint(float dt)
 	}
 
 	Bot::paint(dt);
+}
+
+void BotGreen::sort(Bot* b0, Bot* b1, int idx1, int idx2)
+{
 }
 
 BotBlue::BotBlue(iRect rt, iColor4f color, float speed, float aiFrom, float aiTo) : Bot(rt, color)
@@ -318,6 +347,10 @@ void BotBlue::paint(float dt)
 	}
 
 	Bot::paint(dt);
+}
+
+void BotBlue::sort(Bot* b0, Bot* b1, int idx1, int idx2)
+{
 }
 
 

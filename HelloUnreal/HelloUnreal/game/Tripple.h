@@ -20,6 +20,7 @@ struct Bot
 	int energy;
 
 	virtual void paint(float dt);
+	virtual void sort(Bot* b0, Bot* b1, int idx1, int idx2) = 0;
 };
 
 struct BotRed : Bot
@@ -31,6 +32,7 @@ struct BotRed : Bot
 	virtual ~BotRed();
 
 	virtual void paint(float dt) override; // 좌우
+	virtual void sort(Bot* b0, Bot* b1, int idx1, int idx2) override;
 };
 
 struct BotGreen : Bot
@@ -42,6 +44,7 @@ struct BotGreen : Bot
 	virtual ~BotGreen();
 
 	virtual void paint(float dt) override; // 세로
+	virtual void sort(Bot* b0, Bot* b1, int idx1, int idx2) override;
 };
 
 struct BotBlue : Bot
@@ -55,5 +58,6 @@ struct BotBlue : Bot
 	virtual ~BotBlue();
 
 	virtual void paint(float dt) override; // 자율
+	virtual void sort(Bot* b0, Bot* b1, int idx1, int idx2) override;
 };
 
