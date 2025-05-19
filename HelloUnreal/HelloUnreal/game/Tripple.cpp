@@ -7,7 +7,7 @@ Bot** bot;
 
 void loadTripple()
 {
-	bot = new Bot * [3];
+	bot = new Bot*[3];
 	bot[0] = new BotRed(iRectMake(10, 200, 50, 50), 
 						iColor4fRed, 100.0f);
 	bot[1] = new BotGreen(iRectMake(300, 10, 80, 40), 
@@ -25,12 +25,47 @@ void freeTripple()
 
 void drawTripple(float dt) 
 {
+	int order[] = {0, 1, 2};
 	// y기준으로 정렬?
-	Bot* b = bot[0];
-	float y = b->rt.origin.y + b->rt.size.height;
+	Bot* b0 = bot[0], *b1 = bot[1];
+	if (b0->rt.origin.y + b0->rt.size.height >
+		b1->rt.origin.y + b1->rt.size.height)
+	{
+		int t = order[0];
+		order[0] = order[1];
+		order[1] = t;
+
+		Bot* b = bot[0];
+		bot[0] = bot[1];
+		bot[1] = b;
+	}
+	b0 = bot[0], b1 = bot[2];
+	if (b0->rt.origin.y + b0->rt.size.height >
+		b1->rt.origin.y + b1->rt.size.height)
+	{
+		int t = order[0];
+		order[0] = order[1];
+		order[1] = t;
+
+		Bot* b = bot[0];
+		bot[0] = bot[1];
+		bot[1] = b;
+	}
+	b0 = bot[1], b1 = bot[2];
+	if (b0->rt.origin.y + b0->rt.size.height >
+		b1->rt.origin.y + b1->rt.size.height)
+	{
+		int t = order[0];
+		order[0] = order[1];
+		order[1] = t;
+
+		Bot* b = bot[0];
+		bot[0] = bot[1];
+		bot[1] = b;
+	}
 
 	for (int i = 0; i < 3; i++)
-		bot[i]->paint(dt);
+		bot[order[i]]->paint(dt);
 }
 
 void keyTripple(iKeyStat stat, iPoint point)
