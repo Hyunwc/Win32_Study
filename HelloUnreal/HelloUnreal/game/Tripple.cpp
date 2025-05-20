@@ -4,6 +4,7 @@
 #if 1
 
 Bot** bot;
+iSort* sort;
 
 int order[] = { 0, 1, 2 };
 
@@ -16,6 +17,8 @@ void loadTripple()
 						  iColor4fGreen, 200.0f);
 	bot[2] = new BotBlue(iRectMake(200, 200, 30, 30), 
 						 iColor4fBlue, 300.0f, 1, 2);
+
+	sort = new iSort();
 }
 
 void freeTripple()
@@ -24,6 +27,22 @@ void freeTripple()
 		delete bot[i];
 	delete bot;
 }
+
+//void sort()
+//{
+//	for (int i = 0; i < 2; i++)
+//	{
+//		for (int j = i + 1; j < 3; j++)
+//		{
+//			if (bot[i]->sortY() > bot[j]->sortY())
+//			{
+//				Bot* temp = bot[i];
+//				bot[i] = bot[j];
+//				bot[j] = temp;
+//			}
+//		}
+//	}
+//}
 
 void Shuffle(Bot* b0, Bot* b1, int idx1, int idx2)
 {
@@ -43,48 +62,15 @@ void Shuffle(Bot* b0, Bot* b1, int idx1, int idx2)
 
 void drawTripple(float dt) 
 {
-	Shuffle(bot[0], bot[1], 0, 1);
-	Shuffle(bot[0], bot[2], 0, 2);
-	Shuffle(bot[1], bot[2], 1, 2);
-	/*Bot* b0 = bot[0], *b1 = bot[1];
-	if (b0->rt.origin.y + b0->rt.size.height >
-		b1->rt.origin.y + b1->rt.size.height)
-	{
-		int t = order[0];
-		order[0] = order[1];
-		order[1] = t;
-
-		Bot* b = bot[0];
-		bot[0] = bot[1];
-		bot[1] = b;
-	}
-	b0 = bot[0], b1 = bot[2];
-	if (b0->rt.origin.y + b0->rt.size.height >
-		b1->rt.origin.y + b1->rt.size.height)
-	{
-		int t = order[0];
-		order[0] = order[2];
-		order[2] = t;
-
-		Bot* b = bot[0];
-		bot[0] = bot[2];
-		bot[2] = b;
-	}
-	b0 = bot[1], b1 = bot[2];
-	if (b0->rt.origin.y + b0->rt.size.height >
-		b1->rt.origin.y + b1->rt.size.height)
-	{
-		int t = order[1];
-		order[1] = order[2];
-		order[2] = t;
-
-		Bot* b = bot[1];
-		bot[1] = bot[2];
-		bot[2] = b;
-	}*/
+	sort->init();
 
 	for (int i = 0; i < 3; i++)
-		bot[order[i]]->paint(dt);
+		sort->add(bot[i]->sortY());
+	sort->update();
+
+	for (int i = 0; i < 3; i++)
+		bot[sort->get(i)]->paint(dt);
+
 }
 
 void keyTripple(iKeyStat stat, iPoint point)
@@ -103,8 +89,6 @@ void keyTripple(iKeyStat stat, iPoint point)
 		break;
 	}
 }
-
-
 
 #else
 

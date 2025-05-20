@@ -46,13 +46,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         }
         else
         {
-            // 델타타임
-            static DWORD prev = GetTickCount(); // 이전 시간
-            DWORD now = GetTickCount64(); // 현재 시간
-            float delta = (now - prev) / 1000.0f; // 현재 시간 - 이전시간
-            prev = now;
-
-            drawApp(delta);
+            drawApp(iFPS::instance()->update());
         }
     }
 
@@ -161,6 +155,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         printf("WM_DESTROY\n");
         PostQuitMessage(0);
+        delete iFPS::instance();
         break;
     }
     return DefWindowProc(hWnd, message, wParam, lParam);

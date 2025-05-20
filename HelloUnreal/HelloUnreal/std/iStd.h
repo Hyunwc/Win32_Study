@@ -16,6 +16,9 @@ using namespace Gdiplus;
 #include "iSize.h"
 #include "iString.h"
 
+#include "iFPS.h"
+#include "iSort.h"
+
 enum iKeyStat
 {
 	iKeyStatBegan = 0,

@@ -21,6 +21,11 @@ struct Bot
 
 	virtual void paint(float dt);
 	virtual void sort(Bot* b0, Bot* b1, int idx1, int idx2) = 0;
+
+	float sortY()
+	{
+		return rt.origin.y + rt.size.height;
+	}
 };
 
 struct BotRed : Bot
