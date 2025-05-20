@@ -10,6 +10,8 @@ int order[] = { 0, 1, 2 };
 
 void loadTripple()
 {
+	void aaa();
+	aaa();
 	bot = new Bot*[3];
 	bot[0] = new BotRed(iRectMake(10, 200, 50, 50), 
 						iColor4fRed, 100.0f);

@@ -3,6 +3,19 @@
 #include <stdio.h>
 #include <string.h>
 
+
+iString s1 = "Hello";
+iString s2 = "World";
+
+void aaa()
+{	
+	iString s3 = s1 + "WWWWW";
+	//s1.copy(s1.s, s2.s);
+	printf("%s\n", s1.s);
+	/*s1.subString(2, 4);
+	printf("%s\n", s1.s);*/
+}
+
 iString::iString()
 {
 	//printf("iString()\n");
@@ -117,3 +130,54 @@ iString& iString::operator=(const char* s)
 	return *this;
 }
 
+bool iString::trim()
+{
+	bool exist = false;
+	
+	int len = strlen(s);
+	for (int i = 0; i<len; i++)
+	{
+		if (s[i] != '\t' || s[i] != ' ')
+		{
+			if (i)
+			{
+				strcpy(s, &s[i]);
+				exist = true;
+			}
+			break;
+		}
+	}
+	for (int i = len - 1; i > -1; i--)
+	{
+		if (s[i] != '\t' || s[i] != ' ')
+		{
+			if (i == len - 1)
+			{
+				s[i + 1] = 0;
+				exist = true;
+			}
+			break;
+		}
+	}
+
+	return exist;
+}
+
+void iString::subString(int from, int to)
+{
+	// 현재 객체가 가지고 있는 문자 s를
+	// from부터 to까지 잘라낼 것이다.
+	
+}
+
+void iString::copy(char a[], const char b[])
+{
+	int idx = 0;
+	while (b[idx] != '\0')
+	{
+		a[idx] = b[idx];
+		idx++;
+	}
+
+	a += '0';
+}

@@ -10,6 +10,8 @@
 # Precompiled Headers
 *.gch
 *.pch
+# Visual Studio 2022 user specific files
+.vs/
 
 # Compiled Dynamic libraries
 *.so
