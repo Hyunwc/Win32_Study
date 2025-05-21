@@ -1,4 +1,3 @@
-#include "framework.h"
 #include "HelloUnreal.h"
 
 #include "iStd.h"
@@ -98,6 +97,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case 68:// d
             keydown |= keydown_d;
             break;
+        case 32:// space
+            keydown |= keydown_space;
+            break;
         }
         check(keydown);
         break;
@@ -115,6 +117,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case 68:// d
             keydown &= ~keydown_d;
+            break;
+        case 32:// space
+            keydown &= ~keydown_space;
             break;
         }
         check(keydown);
@@ -135,7 +140,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             keyApp(iKeyStatMoved, iPointMake(LOWORD(lParam), HIWORD(lParam)));
         break;
     case WM_MOVE:
-        printf("WM_MOVE\n");
+        //printf("WM_MOVE\n");
         break;
     case WM_SIZE:
         printf("WM_SIZE\n");

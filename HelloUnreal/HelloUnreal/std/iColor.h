@@ -1,6 +1,6 @@
 #pragma once
 
-typedef unsigned char byte;
+#include "iDefine.h"
 
 struct iColor4f;
 

@@ -10,10 +10,10 @@ iString s2 = "World";
 void aaa()
 {	
 	iString s3 = s1 + "WWWWW";
-	//s1.copy(s1.s, s2.s);
+	s1.copy(s1.s, s2.s);
 	printf("%s\n", s1.s);
-	/*s1.subString(2, 4);
-	printf("%s\n", s1.s);*/
+	s1.subString(2, 4);
+	printf("%s\n", s1.s);
 }
 
 iString::iString()
@@ -165,9 +165,22 @@ bool iString::trim()
 
 void iString::subString(int from, int to)
 {
-	// 현재 객체가 가지고 있는 문자 s를
-	// from부터 to까지 잘라낼 것이다.
-	
+	/*if (!s) return;
+
+	int len = strlen(s);
+	if (from < 0 || to >= len || from > to)
+		return;*/
+
+	// 새로운 길이 = to - from + 2 -> to(4) - from(2) + 1 = 3
+	int newLen = to - from + 1;
+	char* t = new char[newLen + 1];
+
+	for (int i = 0; i < newLen; i++)
+		t[i] = s[from + i];
+	t[newLen] = '\0';
+
+	delete[] s;
+	s = t;
 }
 
 void iString::copy(char a[], const char b[])
@@ -179,5 +192,5 @@ void iString::copy(char a[], const char b[])
 		idx++;
 	}
 
-	a += '0';
+	a[idx] = '\0';
 }

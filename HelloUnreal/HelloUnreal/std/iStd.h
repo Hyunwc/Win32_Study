@@ -1,14 +1,6 @@
 #pragma once
 
-#if _DEBUG
-#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
-#endif
-
-#include <Windows.h>
-
-#include <gdiplus.h>
-using namespace Gdiplus;
-#pragma comment (lib, "Gdiplus.lib")
+#include "iDefine.h"
 
 #include "iPoint.h"
 #include "iRect.h"
@@ -19,30 +11,7 @@ using namespace Gdiplus;
 #include "iFPS.h"
 #include "iSort.h"
 
-enum iKeyStat
-{
-	iKeyStatBegan = 0,
-	iKeyStatMoved,
-	iKeyStatEnded,
-	iKeyStatCancel
-};
-
-typedef void (*METHOD_VOID)();
-typedef void (*METHOD_FLOAT)(float dt);
-typedef void (*METHOD_KEY)(iKeyStat stat, iPoint point);
-
 extern int keydown;
-#define keydown_none 0// 00000000 00000000 00000000 00000000 
-#define keydown_w    1// 00000000 00000000 00000000 00000001 
-#define keydown_a    2// 00000000 00000000 00000000 00000010 
-#define keydown_s    4// 00000000 00000000 00000000 00000100 
-#define keydown_d    8// 00000000 00000000 00000000 00001000 
-#define keydown_up   16// 00000000 00000000 00000000 00001000 
-#define keydown_left  32// 00000000 00000000 00000000 00001000 
-#define keydown_down   64// 00000000 00000000 00000000 00001000 
-#define keydown_right   128// 00000000 00000000 00000000 00001000 
-#define keydown_what   1<<31// 10000000 00000000 00000000 00000000
-
 
 void loadApp(HWND hWnd, METHOD_VOID load, METHOD_VOID free,
 	METHOD_FLOAT draw, METHOD_KEY key);
