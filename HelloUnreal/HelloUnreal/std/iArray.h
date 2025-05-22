@@ -5,15 +5,15 @@
 struct Node
 {
 	Node* prev;
-	// Node* next;
+    Node* next;
 	void* data;
 };
 
 typedef void (*MethodArray)(void* data);
 struct iArray
 {
-	Node* lastNode; // 마지막 노드 즉, tail
-	//Node* head;
+	Node* tail; // 마지막 노드 즉, tail
+	Node* head; // 제일 첫 노드
 	int count;
 	MethodArray method;
 

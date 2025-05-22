@@ -3,7 +3,8 @@
 
 iArray::iArray(MethodArray method)
 {
-	lastNode = NULL;
+	tail = NULL;
+	head = NULL;
 	count = 0;
 	this->method = method;
 }
@@ -16,31 +17,31 @@ iArray::~iArray()
 void iArray::add(void* data)
 {
 	Node* n = new Node;
-	n->prev = lastNode;
+	n->prev = tail;
 	n->data = data;
 
-	lastNode = n; // 마지막 노드 업데이트
+	tail = n; // 마지막 노드 업데이트
 	count++;
 }
 
 void iArray::add(int index, void* data)
 {
-	Node* n = lastNode; // 백업
+	Node* b = tail; // 백업
 
 	for (int i = count - 1; i > -1; i--)
 	{
 		if (i == index)
 		{
 			// n을 가르키는 이전 node
-			Node* t = new Node; // 새로 삽입할 데이터
-			t->prev = n->prev;
-			t->data = data;
+			Node* newNode = new Node; // 새로 삽입할 데이터
+			newNode->prev = b->prev;
+			newNode->data = data;
 
-			n->prev = t;
+			b->prev = newNode;
 			count++;
 			return;
 		}
-		n = n->prev;
+		b = b->prev;
 	}
 
 	// 못 넣었으니까 여기까지 옴. early return 필요 x
@@ -51,7 +52,7 @@ void* iArray::at(int index)
 {
 	int i = count - 1;
 
-	for (Node* n = lastNode; n; n = n->prev, i--)
+	for (Node* n = tail; n; n = n->prev, i--)
 	{
 		if (i == index)
 		{
@@ -64,7 +65,7 @@ void* iArray::at(int index)
 
 void iArray::removeAll()
 {
-	for (Node* n = lastNode; n;)
+	for (Node* n = tail; n;)
 	{
 		Node* t = n->prev; // 이전값을 t에 담고
 		// 콜백이 등록되어있다면 데이터 지워달라
@@ -73,23 +74,23 @@ void iArray::removeAll()
 		delete n;
 		n = t; 
 	}
-	lastNode = NULL;
+	tail = NULL;
 	count = 0;
 }
 
 void iArray::remove(int index)
 {
 	Node* prevN = NULL; // 이전
-	Node* n = lastNode; // 현재
+	Node* n = tail; // 현재
 	int i = count - 1;
-	for (Node* n = lastNode, *prevN = NULL; n; prevN = n, n = n->prev, i--)
+	for (Node* n = tail, *prevN = NULL; n; prevN = n, n = n->prev, i--)
 	{
 		if (i == index)
 		{
 			if (prevN)
 				prevN->prev = n->prev;
 			else// if(prevN == NULL)
-				lastNode = n->prev; // 마지막 노드를 업데이트
+				tail = n->prev; // 마지막 노드를 업데이트
 
 			if (method)
 				method(n->data);
