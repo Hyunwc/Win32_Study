@@ -14,9 +14,9 @@ using namespace Gdiplus;
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
-#include <malloc.h>
-#include <memory.h>
-#include <tchar.h>
+//#include <malloc.h>
+//#include <memory.h>
+//#include <tchar.h>
 
 #define DEV_WIDTH 640
 
@@ -56,3 +56,13 @@ typedef void (*METHOD_KEY)(iKeyStat stat, iPoint point);
 #define keydown_right   128// 00000000 00000000 00000000 00001000 
 #define keydown_space 256
 #define keydown_what   1<<31// 10000000 00000000 00000000 00000000
+
+struct Texture
+{
+	// openGL : unsigned int
+	// gdi+ : Image(클래스 name)
+	void* texID; 
+	int width, height;
+	int potWidth, potHeight;
+	int retainCount;
+};

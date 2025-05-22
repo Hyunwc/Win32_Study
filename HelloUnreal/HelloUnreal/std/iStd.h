@@ -7,6 +7,7 @@
 #include "iColor.h"
 #include "iSize.h"
 #include "iString.h"
+#include "iArray.h"
 
 #include "iFPS.h"
 #include "iSort.h"
@@ -31,6 +32,10 @@ void drawRect(iRect rt);
 
 void fillRect(float x, float y, float width, float height);
 void fillRect(iRect rt);
+
+Texture* createImage(const char* szFormat, ...);
+void freeImage(Texture* tex);
+void drawImage(Texture* tex, float x, float y);
 
 void setStringSize(float size);
 void setStringRGBA(float r, float g, float b, float a);

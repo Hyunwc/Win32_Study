@@ -9,6 +9,7 @@ float takeTime;
 #include "Lotto.h"
 #include "Tripple.h"
 #include "AirShooting.h"
+#include "Memory.h"
 
 void loadGame()
 {
@@ -19,8 +20,10 @@ void loadGame()
 	loadLotto();
 #elif 0
 	loadTripple();
-#else
+#elif 0
 	loadAirShootng();
+#else
+	loadMemory();
 #endif
 }
 
@@ -30,8 +33,10 @@ void freeGame()
 	//freeLotto();
 #elif 0
 	freeTripple();
-#else
+#elif 0
 	freeAirShootng();
+#else
+	freeMemory();
 #endif
 }
 
@@ -46,8 +51,11 @@ void drawGame(float dt)
 #elif 0
 	drawTripple(dt);
 	return;
-#else
+#elif 0
 	drawAirShootng(dt);
+	return;
+#else
+	drawMemory(dt);
 	return;
 #endif
 	drawString(300, 100, L"Hi");
@@ -123,8 +131,11 @@ void keyGame(iKeyStat stat, iPoint point)
 #elif 0
 	keyTripple(stat, point);
 	return;
-#else
+#elif 0
 	keyAirShootng(stat, point);
+	return;
+#else
+	keyMemory(stat, point);
 	return;
 #endif
 	

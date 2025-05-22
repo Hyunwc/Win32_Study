@@ -107,6 +107,7 @@ void drawUs(float dt)
 #if 0
 			Ball* b = new Ball;
 #else
+			// 메모리 풀링
 			// 100개중 비활성화된 것을 찾아 등록
 			Ball* b = NULL;
 			int index = 0; // 0번째 총알 사용
@@ -163,6 +164,7 @@ void freeYou()
 	delete you;
 }
 
+void updateYou(float dt);
 void drawYou(float dt)
 {
 	//Enemy
@@ -192,6 +194,11 @@ void drawYou(float dt)
 		}
 	}
 
+	updateYou(dt);
+}
+
+void updateYou(float dt)
+{
 	// render 2~3초에 한번씩 you 생성
 	createYouDt += dt;
 	if (createYouDt > _createYouDt)
@@ -221,6 +228,7 @@ void drawYou(float dt)
 		printf("추가 적 = %d\n", youNum);
 	}
 }
+
 
 // ============================
 // Ball
@@ -275,7 +283,6 @@ void drawBall(float dt)
 			// 삭제가 아닌 NULL로 비활성화
 			b->own = NULL;
 #endif
-
 			ballNum--;
 			// 배열을 앞으로 당김
 			for (int j = i; j < ballNum; j++)
@@ -436,7 +443,7 @@ bool keyUI(iKeyStat stat, iPoint point)
 		break;
 	}
 
-	return false;
+	return true;
 }
 
 

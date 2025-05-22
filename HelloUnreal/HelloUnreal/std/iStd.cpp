@@ -126,6 +126,26 @@ void fillRect(iRect rt)
 	fillRect(rt.origin.x, rt.origin.y, rt.size.width, rt.size.height);
 }
 
+Texture* createImage(const char* szFormat, ...)
+{
+	return NULL;
+}
+
+void freeImage(Texture* tex)
+{
+	if (tex->retainCount > 1)
+	{
+		tex->retainCount--;
+		return;
+	}
+
+	// real tex 지우기
+}
+
+void drawImage(Texture* tex, float x, float y)
+{
+}
+
 float stringsize = 25.0f;
 float sr, sg, sb, sa = 1.0f;
 

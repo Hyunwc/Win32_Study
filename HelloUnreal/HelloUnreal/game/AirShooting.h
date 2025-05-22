@@ -17,10 +17,7 @@ struct Us
 	// _rate -> 어디선가 가지고 있어야 rate 반영
 	float moveSpeed, rate, _rate;
 
-	iRect rt()
-	{
-		return iRectMake(position.x - 15, position.y - 15, 30, 30);
-	}
+	iRect rt() { return iRectMake(position.x - 15, position.y - 15, 30, 30);}
 };
 
 extern Us* us;
@@ -39,10 +36,7 @@ struct You
 	iPoint position, v;
 	float moveSpeed;
 
-	iRect rt()
-	{
-		return iRectMake(position.x - 10, position.y - 10, 20, 20);
-	}
+	iRect rt() { return iRectMake(position.x - 10, position.y - 10, 20, 20);}
 };
 
 extern You* _you;
