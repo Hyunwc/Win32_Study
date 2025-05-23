@@ -255,13 +255,15 @@ void move(iPoint* cp, const iPoint* tp, const iPoint& mp)
 	}
 }
 
-char* loadFile(const char* szFormat, ...)
+char* loadFile(int& len, const char* szFormat, ...)
 {
 	FILE* pf = fopen(szFormat, "rb");
 	
-	// offset : 파일 끝, origin : 파일 시작 
+	// offset : 이동할 거리, origin : 어떻게 이동할지
+	// 파일 끝으로 이동해서
+	// len에 현재 위치 값을 반환해서 크기 할당
 	fseek(pf, 0, SEEK_END); // 파일 끝
-	long len = ftell(pf); 
+	len = ftell(pf); 
 	// 문자열일수도 있으니 + 1
 	char* buf = new char[len + 1];
 	

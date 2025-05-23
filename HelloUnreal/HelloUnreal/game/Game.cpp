@@ -16,6 +16,7 @@ ParticleSystem* ps;
 
 void loadGame()
 {
+#if 1
 	struct Score
 	{
 		char name[32];
@@ -26,11 +27,23 @@ void loadGame()
 		{"김태현", 100, 100, 100},
 		{"김재학", 50, 50, 50},
 		{"고민철", 50, 50, 50},
-	};
+	};*/
+	//saveFile((char*)score, sizeof(score), "test.sav");
 
-	saveFile((char*)score, sizeof(score), "test.sav");*/
+	// 외부에서 파일을 해석하지 못하게 하는 방법1
+	/*int len = sizeof(score);
+	char* t = new char[len];
+	for (int i = 0; i < len; i++)
+		t[i] = ((char*)score)[i] + 128;
+	saveFile(t, len, "test.sav");*/
 
-	Score* s = (Score*)loadFile("test.sav");
+
+	int len;
+	char* t = loadFile(len, "test.sav");
+	/*for (int i = 0; i < len; i++)
+		t[i] -= 128;*/
+	Score* s = (Score*)t;
+	//Score* s = (Score*)loadFile("test.sav");
 	for (int i = 0; i < 3; i++)
 	{
 		printf("[%s] %d %d %d\n",
@@ -40,7 +53,19 @@ void loadGame()
 	/*char* str = loadFile("HelloUnreal.h");
 	printf("HelloUnreal.h\n%s\n", str);
 	delete str;*/
+#else
 
+#pragma pack(push, 1)
+	struct Score
+	{
+		char kor;
+		short math;
+		int eng;
+	};
+#pragma pack(pop)
+
+	printf("%d\n", sizeof(Score));
+#endif
 	me = iRectMake(0, 0, 50, 50);
 	takeTime = 0.0f;
 

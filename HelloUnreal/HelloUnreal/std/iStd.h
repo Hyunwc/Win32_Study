@@ -56,5 +56,6 @@ float clamp(float f, float min, float max);
 void move(iPoint* cp, const iPoint* tp, const iPoint& mp);
 
 // 파일 입출력
-char* loadFile(const char* szFormat, ...);
+char* loadFile(int& len, const char* szFormat, ...);
 void saveFile(char* buf, int bufLen, const char* szFormat, ...);
+// bmp, png,
