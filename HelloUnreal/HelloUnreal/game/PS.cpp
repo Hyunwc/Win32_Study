@@ -12,11 +12,13 @@ ParticleSystem::ParticleSystem()
 	_createDt = 0.1f;
 	createDt = 0.0f; 
 
-	life = 0.2f, lifeVar = 0.1f; // 0.2 ~ 0.3
-	v = 0.8f, vVar = 0.4f; // 0.8 ~ 1.2
+	life = 0.5f, lifeVar = 0.4f; // 0.2 ~ 0.3
+	v = 10.0f, vVar = 90.0f; // 0.8 ~ 1.2
 	ss = 1, ssVar = 9.0f; // ss 1 ~ 10
 	se = 1, seVar = 2.0f; // s 1 ~ 3
+	//cs = iColor4fWhite, csVar = iColor4fMake(0, 0, 0, 0);
 	cs = iColor4fWhite, csVar = iColor4fMake(0, 0, 0, 0);
+	//ce = iColor4fMake(1, 0.3, 1, 1), ceVar = iColor4fMake(0, 0, 0, 0);
 	ce = iColor4fBlack, ceVar = iColor4fMake(0, 0, 0, 0);
 }
 
@@ -78,7 +80,7 @@ void ParticleSystem::initParticle(Particle* p, iPoint pos)
 
 	p->p = pos + iPointMake(-5 + rand() % 10, -2 + rand() % 4);
 	p->v = iPointMake(0, -1) * // iPointRotate 75 ~ 105
-		(10 + 90 * ((rand() % 100) / 100.0f)); // 10 ~ 90
+		(v + vVar * ((rand() % 100) / 100.0f)); // 10 ~ 90
 	p->ss = ss + ssVar * ((rand() % 100) / 100.0f);
 	p->se = se + seVar * ((rand() % 100) / 100.0f);
 	p->cs = cs + csVar * ((rand() % 100) / 100.0f);
@@ -166,4 +168,8 @@ void ParticleSystem::load(const char* path)
 	fread(&ceVar, sizeof(iColor4f), 1, pf);
 
 	fclose(pf);
+}
+
+void ParticleSystem::move(iKeyStat stat, iPoint point)
+{
 }

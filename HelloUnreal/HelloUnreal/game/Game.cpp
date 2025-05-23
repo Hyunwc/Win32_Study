@@ -12,16 +12,19 @@ float takeTime;
 #include "Memory.h"
 #include "PS.h"
 
+ParticleSystem** _ps;
 ParticleSystem* ps;
+iPoint psPos;
+int psIndex;
 
 void loadGame()
 {
 #if 1
-	struct Score
+	/*struct Score
 	{
 		char name[32];
 		int kor, eng, math;
-	};
+	};*/
 
 	/*Score score[3] = {
 		{"김태현", 100, 100, 100},
@@ -38,17 +41,17 @@ void loadGame()
 	saveFile(t, len, "test.sav");*/
 
 
-	int len;
-	char* t = loadFile(len, "test.sav");
-	/*for (int i = 0; i < len; i++)
-		t[i] -= 128;*/
-	Score* s = (Score*)t;
-	//Score* s = (Score*)loadFile("test.sav");
-	for (int i = 0; i < 3; i++)
-	{
-		printf("[%s] %d %d %d\n",
-			s[i].name, s[i].kor, s[i].eng, s[i].math);
-	}
+	//int len;
+	//char* t = loadFile(len, "test.sav");
+	///*for (int i = 0; i < len; i++)
+	//	t[i] -= 128;*/
+	//Score* s = (Score*)t;
+	////Score* s = (Score*)loadFile("test.sav");
+	//for (int i = 0; i < 3; i++)
+	//{
+	//	printf("[%s] %d %d %d\n",
+	//		s[i].name, s[i].kor, s[i].eng, s[i].math);
+	//}
 
 	/*char* str = loadFile("HelloUnreal.h");
 	printf("HelloUnreal.h\n%s\n", str);
@@ -73,17 +76,30 @@ void loadGame()
 	loadLotto();
 #elif 0
 	loadTripple();
-#elif 0
+#elif 1
 	loadAirShootng();
 #else
 	loadMemory();
 #endif
 
+#if 0
+	_ps = new ParticleSystem * [7];
+	for (int i = 0; i < 7; i++)
+	{
+		char path[32];
+		sprintf(path, "test%d.ptc", i);
+		_ps[i] = new ParticleSystem(path);
+	}
+	ps = _ps[psIndex = 0];
+	//ps = new ParticleSystem();
+#else
 	/*ps = new ParticleSystem();
-	ps->save("test.ptc");*/
-	
-	// 파일 이름으로 Load
-	ps = new ParticleSystem("test.ptc");
+	ps->save("test6.ptc");*/
+#endif
+
+	//
+	//// 파일 이름으로 Load
+	//ps = new ParticleSystem("test.ptc");
 }
 
 void freeGame()
@@ -92,13 +108,14 @@ void freeGame()
 	freeLotto();
 #elif 0
 	freeTripple();
-#elif 0
+#elif 1
 	freeAirShootng();
 #else
 	freeMemory();
 #endif
 
 	delete ps;
+	delete _ps;
 }
 
 void drawGame(float dt)
@@ -112,16 +129,25 @@ void drawGame(float dt)
 #elif 0
 	drawTripple(dt);
 	return;
-#elif 0
+#elif 1
 	drawAirShootng(dt);
 	return;
 #elif 0
 	drawMemory(dt);
 	return;
 #else
-	ps->paint(dt, iPointMake(DEV_WIDTH/2, DEV_HEIGHT /2));
+	//ps->paint(dt, iPointMake(DEV_WIDTH/2, DEV_HEIGHT /2));
+	ps->paint(dt, iPointMake(psPos.x, psPos.y));
+
+	if (keydown & keydown_space)
+	{
+		psIndex = (psIndex + 1) % 7;
+		ps = _ps[psIndex];
+	}
 	return
 #endif
+
+#if 1
 	drawString(300, 100, L"Hi");
 
 	takeTime += dt;
@@ -131,6 +157,7 @@ void drawGame(float dt)
 	setRGBA(1, 0, 0, 1);
 	//drawLine(50 + dx, 0, 150 + dx, 100);
 	fillRect(me);
+#endif
 
 #define move_speed 300
 #if 0// ctrl
@@ -195,21 +222,24 @@ void keyGame(iKeyStat stat, iPoint point)
 #elif 0
 	keyTripple(stat, point);
 	return;
-#elif 0
+#elif 1
 	keyAirShootng(stat, point);
 	return;
-#else
+#elif 0
 	keyMemory(stat, point);
 	return;
+#else
+	//ps->move(stat, point);
 #endif
 	
 	if (stat == iKeyStatBegan)
 	{
+		//psPos = point;
 		tp = point;
 	}
 	else if (stat == iKeyStatMoved)
 	{
-
+		psPos = point;
 	}
 	else if (stat == iKeyStatEnded)
 	{

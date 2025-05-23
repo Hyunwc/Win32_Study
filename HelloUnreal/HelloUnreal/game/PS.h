@@ -46,4 +46,5 @@ struct ParticleSystem
 
 	void save(const char* path);
 	void load(const char* path);
+	void move(iKeyStat stat, iPoint point);
 };

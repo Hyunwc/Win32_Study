@@ -1,8 +1,9 @@
 #include "AirShooting.h"
-
+#include "PS.h"
 // ============================
 // Player
 // ============================
+ParticleSystem* muzzle;
 
 void loadAirShootng()
 {
@@ -12,6 +13,7 @@ void loadAirShootng()
 
 	loadEffect();
 	loadUI();
+	muzzle = new ParticleSystem();
 }
 
 void freeAirShootng()
@@ -109,6 +111,7 @@ void drawUs(float dt)
 #else
 			// 메모리 풀링
 			// 100개중 비활성화된 것을 찾아 등록
+			muzzle->paint(dt, iPointMake(us->position.x, us->position.y - 30));
 			Ball* b = NULL;
 			int index = 0; // 0번째 총알 사용
 			for (int i = 0; i < ballMax; i++)
@@ -134,6 +137,7 @@ void drawUs(float dt)
 			ballNum++;
 			printf("추가 총알 = %d\n", ballNum);
 		}
+
 	}
 }
 
