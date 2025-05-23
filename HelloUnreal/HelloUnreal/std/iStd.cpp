@@ -209,6 +209,23 @@ iPoint easeOut(iPoint s, iPoint e, float rate)
 	return iPointZero;
 }
 
+//float clamp2(float f, float min2, float max2)
+//{
+//	return min(max(f, min2), max2);
+//}
+
+//#define clamp(a, b, c) min(max(a, b), c)
+
+float clamp(float f, float min, float max)
+{
+	if (f < min)
+		f = min;
+	else if (f > max)
+		f = max;
+
+	return f;
+}
+
 void move(iPoint* cp, const iPoint* tp, const iPoint& mp)
 {
 	if (cp->x < tp->x)
@@ -236,5 +253,32 @@ void move(iPoint* cp, const iPoint* tp, const iPoint& mp)
 		if (cp->y < tp->y)
 			cp->y = tp->y;
 	}
+}
+
+char* loadFile(const char* szFormat, ...)
+{
+	FILE* pf = fopen(szFormat, "rb");
+	
+	// offset : 파일 끝, origin : 파일 시작 
+	fseek(pf, 0, SEEK_END); // 파일 끝
+	long len = ftell(pf); 
+	// 문자열일수도 있으니 + 1
+	char* buf = new char[len + 1];
+	
+	fseek(pf, 0, SEEK_SET); // 파일 시작
+	fread(buf, sizeof(char), len, pf);
+	buf[len] = 0;
+
+	fclose(pf);
+	return buf;
+}
+
+void saveFile(char* buf, int bufLen, const char* szFormat, ...)
+{
+	FILE* pf = fopen(szFormat, "wb");
+
+	fwrite(buf, sizeof(char), bufLen, pf);
+
+	fclose(pf);
 }
 

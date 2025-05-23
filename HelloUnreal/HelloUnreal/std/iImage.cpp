@@ -15,7 +15,7 @@ void iImage::cb(void* data)
 {
 	Texture* tex = (Texture*)data;
 	freeImage(tex);
-	delete tex;
+	//delete tex;
 }
 
 void iImage::add(Texture* tex)

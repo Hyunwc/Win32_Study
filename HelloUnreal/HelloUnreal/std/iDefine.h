@@ -12,11 +12,12 @@ using namespace Gdiplus;
 #pragma comment (lib, "Gdiplus.lib")
 
 #include <stdio.h>
-#include <iostream>
+//#include <iostream>
 #include <stdlib.h>
 //#include <malloc.h>
 //#include <memory.h>
 //#include <tchar.h>
+using namespace std;
 
 #define DEV_WIDTH 640
 

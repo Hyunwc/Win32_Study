@@ -9,6 +9,8 @@ struct iColor4b
 	byte r, g, b, a;
 
 	iColor4b& operator =(const iColor4f& c);
+	iColor4b operator +(const iColor4b& c);
+	iColor4b operator *(float f);
 };
 
 struct iColor4f
@@ -16,6 +18,8 @@ struct iColor4f
 	float r, g, b, a;
 
 	iColor4f& operator =(const iColor4b& c);
+	iColor4f operator +(const iColor4f& c);
+	iColor4f operator *(float f);
 };
 
 iColor4b iColor4bMake(byte r, byte g, byte b, byte a);

@@ -10,9 +10,37 @@ float takeTime;
 #include "Tripple.h"
 #include "AirShooting.h"
 #include "Memory.h"
+#include "PS.h"
+
+ParticleSystem* ps;
 
 void loadGame()
 {
+	struct Score
+	{
+		char name[32];
+		int kor, eng, math;
+	};
+
+	/*Score score[3] = {
+		{"김태현", 100, 100, 100},
+		{"김재학", 50, 50, 50},
+		{"고민철", 50, 50, 50},
+	};
+
+	saveFile((char*)score, sizeof(score), "test.sav");*/
+
+	Score* s = (Score*)loadFile("test.sav");
+	for (int i = 0; i < 3; i++)
+	{
+		printf("[%s] %d %d %d\n",
+			s[i].name, s[i].kor, s[i].eng, s[i].math);
+	}
+
+	/*char* str = loadFile("HelloUnreal.h");
+	printf("HelloUnreal.h\n%s\n", str);
+	delete str;*/
+
 	me = iRectMake(0, 0, 50, 50);
 	takeTime = 0.0f;
 
@@ -25,12 +53,18 @@ void loadGame()
 #else
 	loadMemory();
 #endif
+
+	/*ps = new ParticleSystem();
+	ps->save("test.ptc");*/
+	
+	// 파일 이름으로 Load
+	ps = new ParticleSystem("test.ptc");
 }
 
 void freeGame()
 {
 #if 0
-	//freeLotto();
+	freeLotto();
 #elif 0
 	freeTripple();
 #elif 0
@@ -38,6 +72,8 @@ void freeGame()
 #else
 	freeMemory();
 #endif
+
+	delete ps;
 }
 
 void drawGame(float dt)
@@ -54,9 +90,12 @@ void drawGame(float dt)
 #elif 0
 	drawAirShootng(dt);
 	return;
-#else
+#elif 0
 	drawMemory(dt);
 	return;
+#else
+	ps->paint(dt, iPointMake(DEV_WIDTH/2, DEV_HEIGHT /2));
+	return
 #endif
 	drawString(300, 100, L"Hi");
 
@@ -152,4 +191,5 @@ void keyGame(iKeyStat stat, iPoint point)
 
 	}
 }
+
 

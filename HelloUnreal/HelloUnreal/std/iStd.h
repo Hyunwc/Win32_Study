@@ -51,4 +51,10 @@ iPoint easeln(iPoint s, iPoint e, float rate);
 float easeOut(float s, float e, float rate);
 iPoint easeOut(iPoint s, iPoint e, float rate);
 
+float clamp(float f, float min, float max);
+
 void move(iPoint* cp, const iPoint* tp, const iPoint& mp);
+
+// 파일 입출력
+char* loadFile(const char* szFormat, ...);
+void saveFile(char* buf, int bufLen, const char* szFormat, ...);

@@ -4,7 +4,7 @@
 iArray::iArray(MethodArray method)
 {
 	tail = NULL;
-	head = NULL;
+	//head = NULL;
 	count = 0;
 	this->method = method;
 }
@@ -16,11 +16,16 @@ iArray::~iArray()
 
 void iArray::add(void* data)
 {
-	Node* n = new Node;
-	n->prev = tail;
-	n->data = data;
+	Node* newNode = new Node;
 
-	tail = n; // 마지막 노드 업데이트
+	/*if (head == NULL)
+		head = tail;*/
+
+	newNode->prev = tail;
+	newNode->data = data;
+	
+	tail = newNode; // 마지막 노드 업데이트
+	//tail->next = NULL;
 	count++;
 }
 
@@ -80,24 +85,24 @@ void iArray::removeAll()
 
 void iArray::remove(int index)
 {
-	Node* prevN = NULL; // 이전
-	Node* n = tail; // 현재
-	int i = count - 1;
-	for (Node* n = tail, *prevN = NULL; n; prevN = n, n = n->prev, i--)
+	Node* prevN = NULL;
+	Node* n = tail;
+	for (int i = count - 1; i > -1; i--)
 	{
 		if (i == index)
 		{
 			if (prevN)
 				prevN->prev = n->prev;
-			else// if(prevN == NULL)
-				tail = n->prev; // 마지막 노드를 업데이트
+			else// if (prevN == NULL)
+				tail = n->prev;
 
 			if (method)
 				method(n->data);
 			delete n;
 			return;
 		}
-		/*prevN = n;
-		n = n->prev;*/
+
+		prevN = n;
+		n = n->prev;
 	}
 }
