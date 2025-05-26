@@ -126,9 +126,45 @@ void fillRect(iRect rt)
 	fillRect(rt.origin.x, rt.origin.y, rt.size.width, rt.size.height);
 }
 
+uint32 nextPot(uint32 x)
+{
+	// 1, 2, 4, 8 ,16, 32 ,64, 128, 256, 512
+	
+	/*if (x < (x << 1))
+		x << 1;*/
+#if 0
+	uint32 i = 1;
+	for (; i < x; i = i << 1);
+	return i;
+#else
+	x = x - 1;
+	x = x | (x >> 1);
+	x = x | (x >> 2);
+	x = x | (x >> 4);
+	x = x | (x >> 8);
+	x = x | (x >> 16);
+	return x + 1;
+#endif
+}
+
 Texture* createImage(const char* szFormat, ...)
 {
-	return NULL;
+	char szText[512];
+	va_start_end(szFormat, szText);
+
+	wchar_t* path = utf8_to_utf16(szText);
+	Image* img = Image::FromFile(path);
+	delete path;
+
+	Texture* tex = new Texture;
+	tex->texID = img;
+	tex->width = img->GetWidth();
+	tex->height = img->GetHeight();
+	tex->potWidth = nextPot(img->GetWidth());
+	tex->potHeight = nextPot(img->GetHeight());
+	tex->retainCount++;
+
+	return tex;
 }
 
 void freeImage(Texture* tex)
@@ -139,11 +175,94 @@ void freeImage(Texture* tex)
 		return;
 	}
 
-	// real tex 지우기
+	Image* img = (Image*)tex->texID;
+
+	delete img;
+	delete tex;
 }
 
-void drawImage(Texture* tex, float x, float y)
+void drawImage(Texture* tex, float x, float y, int anc)
 {
+	switch (anc)
+	{
+	case TOP | LEFT:									break;
+	case TOP | HCENTER:		x -= tex->width / 2;	y;	break;
+	case TOP | RIGHT:		x -= tex->width;		y;	break;
+
+	case VCENTER | LEFT:							y -= tex->height / 2;	break;
+	case VCENTER | HCENTER:	x -= tex->width / 2;	y -= tex->height / 2;	break;
+	case VCENTER | RIGHT:	x -= tex->width;		y -= tex->height / 2;	break;break;
+
+	case BOTTOM | LEFT:								y -= tex->height; break;
+	case BOTTOM | HCENTER:	x -= tex->width / 2;	y -= tex->height; break;
+	case BOTTOM | RIGHT:	x -= tex->width;		y -= tex->height; break;
+	}
+
+	graphics->DrawImage((Image*)tex->texID, x, y);
+}
+
+void drawImage(Texture* tex, float x, float y, 
+	int sx, int sy, int sw, int sh, 
+	float rateX, float rateY, 
+	int xyz, float degree, int anc)
+{
+	int w = sw * rateX;
+	int h = sh * rateY;
+	iPoint p[3] = { {x, y}, {x + w, y}, {x, y + h} };
+	// degree가 0이면 회전할 필요x
+	if (degree)
+	{
+		int w2 = w / 2, h2 = h / 2;
+		// x축 회전
+		if (xyz == 0)
+		{
+			//y = y + h / 2 + h / 2 * cos(deg2rad(degree));
+			p[0].y = 
+			p[1].y = y + h2 + h2 * sin(deg2rad(270 + degree));
+			p[2].y = y + h2 + h2 * cos(deg2rad(degree));
+		}
+		// y축 회전
+		else if (xyz == 1)
+		{
+			p[0].x =
+			p[2].x = x + w2 + w2 * sin(deg2rad(270 + degree));
+			p[1].x = x + w2 + w2 * cos(deg2rad(degree));
+		}
+		// z축 회전
+		else if (xyz == 2)
+		{
+			// (cos - sin)(x = w2)
+			// (sin  cos) (y = h2)
+			float s = sin(deg2rad(degree));
+			float c = cos(deg2rad(degree));
+
+			iPoint dp[] = {
+				{-w2, -h2}, {w2, -h2},
+				{-w2, h2}
+			};
+
+			for (int i = 0; i < 3; i++)
+			{
+				p[i] = p[i] + iPointMake(w2, h2);
+				p[i].x = x + w2 + dp[i].x * c - dp[i].y * s;
+				p[i].y = y + h2 + dp[i].x * s + dp[i].y * c;
+			}
+		}
+	}
+
+	ColorMatrix m = {
+		_r, 0, 0, 0, 0,
+		0, _g, 0, 0, 0,
+		0, 0, _b, 0, 0,
+		0, 0, 0, _a, 0,
+		0, 0, 0, 0, 1
+	};
+
+	ImageAttributes attr;
+	attr.SetColorMatrix(&m);
+
+	graphics->DrawImage((Image*)tex->texID, (PointF*)p, 3,
+		sx, sy, sw, sh, UnitPixel, &attr);
 }
 
 float stringsize = 25.0f;
@@ -159,18 +278,58 @@ void setStringRGBA(float r, float g, float b, float a)
 	sr = r; sg = g; sb = b; sa = a;
 }
 
-void drawString(float x, float y, const WCHAR* str)
+void drawString(float x, float y, const char* szFormat, ...)
 {
+	char szText[512];
+	va_start_end(szFormat, szText);
+
 	FontFamily  fontFamily(L"Times New Roman");
 	Font        font(&fontFamily, stringsize, FontStyleRegular, UnitPixel);
 	PointF      pointF(x, y);
 	SolidBrush  solidBrush(Color(sa * 0xFF,
-								 sr * 0xFF,
-								 sg * 0xFF,
-								 sb * 0xFF));
+		sr * 0xFF,
+		sg * 0xFF,
+		sb * 0xFF));
 
-	graphics->DrawString(str, -1, &font, pointF, &solidBrush);
+	wchar_t* wStr = utf8_to_utf16(szText);
+	graphics->DrawString(wStr, -1, &font, pointF, &solidBrush);
+	delete wStr;
 }
+
+wchar_t* utf8_to_utf16(const char* szFormat, ...)
+{
+	char szText[512];
+	va_start_end(szFormat, szText);
+	int len = MultiByteToWideChar(CP_UTF8, 0, szText, -1, NULL, 0);
+	wchar_t* wStr = new wchar_t[len];
+	MultiByteToWideChar(CP_UTF8, 0, szText, sizeof(szText), wStr, len);
+
+	return wStr;
+}
+
+char* utf16_to_utf8(const wchar_t* wStr)
+{
+	int len = WideCharToMultiByte(CP_UTF8, 0, wStr, lstrlen(wStr), NULL, 0, 0, NULL);
+	char* str = new char[len + 1];
+	WideCharToMultiByte(CP_UTF8, 0, wStr, lstrlen(wStr), str, len, 0, NULL);
+	str[len] = 0;
+
+	return str;
+}
+
+//float rad2deg(float radian)
+//{
+//	// 2pi(r) = 360(d)
+//	// 1(r) = 180 / pi
+//	return 180 / M_PI;
+//}
+//
+//float deg2rad(float degree)
+//{
+//	// 2pi(r) = 360(d)
+//	// 2pi / 360(r) = 1(d)
+//	return M_PI / 180;
+//}
 
 float linear(float s, float e, float rate)
 {
