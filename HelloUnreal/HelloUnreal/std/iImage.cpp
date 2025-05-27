@@ -4,6 +4,13 @@
 iImage::iImage()
 {
 	array = new iArray(cb);
+	method = NULL;
+	animation = false;
+	_aniDt = 0.017f;
+	aniDt = 0.0f;
+	index = 0;
+	position = iPointZero;
+	tex = NULL;
 }
 
 iImage::~iImage()
@@ -25,7 +32,7 @@ void iImage::add(Texture* tex)
 	tex->retainCount++;
 }
 
-void iImage::paint(float dt)
+void iImage::paint(float dt, iPoint position)
 {
 	if (animation)
 	{
@@ -45,8 +52,9 @@ void iImage::paint(float dt)
 		}
 	}
 
-	Texture* tex = (Texture*)array->at(index);
-	drawImage(tex, 0, 0, TOP | LEFT);
+	tex = (Texture*)array->at(index);
+	iPoint p = this->position + position;
+	drawImage(tex, p.x, p.y, TOP | LEFT);
 }
 
 void iImage::startAnimation(MethodImage cb)
@@ -55,4 +63,13 @@ void iImage::startAnimation(MethodImage cb)
 	animation = true;
 	aniDt = 0.0f;
 	index = 0;
+}
+
+iRect iImage::touchRect()
+{
+	iRect rt;
+	rt.origin = position;
+	rt.size = iSizeMake(tex->width, tex->height);
+
+	return rt;
 }

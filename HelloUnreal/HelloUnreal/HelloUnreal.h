@@ -2,6 +2,11 @@
 
 #include "resource.h"
 
+#include "iDefine.h"
+void resize(int width, int height);
+iPoint convertCoord(float x, float y);
+
+
 #if 0
 
 Win32 API + GDI / GDI +
@@ -13,6 +18,7 @@ OpenAL
 브레이크 포인트 F9
 스텝 오버 F10(해당 라인을 실행)
 스텝 인투 F11(함수등에 들어갈 수 있는 곳으로 실행)
+Q) 
 
 #endif
 

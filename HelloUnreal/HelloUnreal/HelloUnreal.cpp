@@ -7,6 +7,7 @@ bool runApp;
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR    lpCmdLine, _In_ int       nCmdShow)
 {
+
     WCHAR szTitle[32] = L"Hello Unreal";
     WCHAR szWindowClass[32] = L"HU";
 
@@ -25,15 +26,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
     RegisterClassExW(&wcex);
 
+    runApp = false;
+    int x = 0, y = 0, w = 640, h = 480;
     HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+        x, y, w, h, nullptr, nullptr, hInstance, nullptr);
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 
     loadApp(hWnd, loadGame, freeGame, drawGame, keyGame);
-    void test();
-    test();
-     
+
+    MoveWindow(hWnd, x, y, w + 1, h, true);
+
     MSG msg;
     runApp = true;
     while (runApp)
@@ -55,8 +58,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 }
 
 #include <stdio.h>
-
-void check(int key);
 
 bool mouseMoving = false;
 
@@ -101,7 +102,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             keydown |= keydown_space;
             break;
         }
-        check(keydown);
         break;
     case WM_KEYUP:
         printf("WM_KEYUP %d\n", wParam);
@@ -122,31 +122,46 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             keydown &= ~keydown_space;
             break;
         }
-        check(keydown);
         break;
 
     case WM_LBUTTONDOWN:
         //printf("WM_LBUTTONDOWN %d (%d, %d)\n", wParam, LOWORD(lParam), HIWORD(lParam));
-        keyApp(iKeyStatBegan, iPointMake(LOWORD(lParam), HIWORD(lParam)));
+        keyApp(iKeyStatBegan, convertCoord(LOWORD(lParam), HIWORD(lParam)));
         mouseMoving = true;
         break;
     case WM_LBUTTONUP:
         //printf("WM_LBUTTONDOWN %d (%d, %d)\n", wParam, LOWORD(lParam), HIWORD(lParam));
-        keyApp(iKeyStatEnded, iPointMake(LOWORD(lParam), HIWORD(lParam)));
+        keyApp(iKeyStatEnded, convertCoord(LOWORD(lParam), HIWORD(lParam)));
         mouseMoving = false;
         break;
     case WM_MOUSEMOVE:
         //if(mouseMoving)
-            keyApp(iKeyStatMoved, iPointMake(LOWORD(lParam), HIWORD(lParam)));
+        keyApp(iKeyStatMoved, convertCoord(LOWORD(lParam), HIWORD(lParam)));
         break;
     case WM_MOVE:
         //printf("WM_MOVE\n");
-        break;
-    case WM_SIZE:
-        printf("WM_SIZE\n");
+        if (runApp)
+            drawApp(iFPS::instance()->update());
         break;
     case WM_SIZING:
-        printf("WM_SIZING\n");
+    {
+        //printf("WM_SIZING\n");
+        // RECT& rect = (RECT)(lParam); 과 똑같음
+        RECT* rect = reinterpret_cast<LPRECT>(lParam);
+        // 윈도우의 영역을
+        printf("WM_SIZING(%d, %d)\n", 
+            rect->right - rect->left,
+            rect->bottom - rect->top);
+    }
+        break;
+    case WM_SIZE:
+        // window 창의 변경된 크기를 알 수 있음
+        // 클라이언트의 영역을
+        printf("WM_SIZE(%d, %d)\n", LOWORD(lParam), HIWORD(lParam));
+        // viewport
+        resize(LOWORD(lParam), HIWORD(lParam));
+        if (runApp)
+            drawApp(iFPS::instance()->update());
         break;
 
     case WM_PAINT:
@@ -166,37 +181,47 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-#include <stdio.h>
-#include "iPoint.h"
-#include "iColor.h"
-#include "iString.h"
-
-void check(int key)
+void resize(int width, int height)
 {
-    if (key & keydown_w)
+    float& dw = devSize.width;
+    float& dh = devSize.height;
+    float& x = viewport.origin.x;
+    float& y = viewport.origin.y;
+    float& vw = viewport.size.width;
+    float& vh = viewport.size.height;
+
+    // 뷰포트 비율 설정
+    float r0 = width / dw;
+    float r1 = height / dh;
+    if (r0 < r1)
     {
-        printf("w ");
+        // width 기준
+        x = 0;
+        vw = width;
+
+        // vw : vh = dw : dh;
+        vh = vw * dh / dw;
+        y = (height - vh) / 2;
     }
-    if (key & keydown_a)
+    else //if (r0 >= r1)
     {
-        printf("a ");
+        // height 기준
+        y = 0;
+        vh = height;
+
+        vw = dw * vh / dh;
+        x = (width - vw) / 2;
     }
-    printf("\n");
+
+    // vWidth : vHieht = devSize.widht : devSize.height;
 }
 
-
-void test()
+iPoint convertCoord(float x, float y)
 {
-#if 0
-    iString s, s2;
-    s = "Hi";
-    s = s2;
-    const char* s1 = "World";
-    if (s == s1)
-        ;
-    if (s == s2)
-        ;
-    const char* s = s0 + "Earth";
-#endif
+    // x, y는 윈도우 클라이언트 영역에 해당하는 좌표
+    iPoint p;
+    p.x = (x - viewport.origin.x) / viewport.size.width * devSize.width;
+    p.y = (y - viewport.origin.y) / viewport.size.height * devSize.height;
+    printf("(%.0f, %.0f) => (%.0f, %.0f)\n", x, y, p.x, p.y);
+    return p;
 }
-

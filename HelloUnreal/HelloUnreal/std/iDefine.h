@@ -42,9 +42,12 @@ enum iKeyStat
 	iKeyStatCancel
 };
 
+struct iPoint;
+struct iSize;
+struct iRect;
+
 typedef void (*METHOD_VOID)();
 typedef void (*METHOD_FLOAT)(float dt);
-struct iPoint;
 typedef void (*METHOD_KEY)(iKeyStat stat, iPoint point);
 
 #define keydown_none 0// 00000000 00000000 00000000 00000000 
@@ -66,6 +69,10 @@ typedef void (*METHOD_KEY)(iKeyStat stat, iPoint point);
 #define TOP			8
 #define BOTTOM		16
 #define VCENTER		32
+
+#define REVERSE_NONE	0
+#define REVERSE_WIDTH	1
+#define REVERSE_HEIGHT	2
 
 struct Texture
 {
