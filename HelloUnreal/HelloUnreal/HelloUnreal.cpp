@@ -7,7 +7,6 @@ bool runApp;
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR    lpCmdLine, _In_ int       nCmdShow)
 {
-
     WCHAR szTitle[32] = L"Hello Unreal";
     WCHAR szWindowClass[32] = L"HU";
 
@@ -196,9 +195,13 @@ void resize(int width, int height)
     if (r0 < r1)
     {
         // width 기준
+        // 내가 디스플레이를 아래로 당겼다면
+        // |ㅡㅡ|
+        // |ㅡㅡ| 뷰포트가 양옆으로 채워져야함.
         x = 0;
         vw = width;
 
+        // height 변경
         // vw : vh = dw : dh;
         vh = vw * dh / dw;
         y = (height - vh) / 2;
@@ -206,9 +209,12 @@ void resize(int width, int height)
     else //if (r0 >= r1)
     {
         // height 기준
+        // 내가 디스플레이를 옆으로 당겼다면
+        // | |  | | 뷰포트가 위쪽은 채워지고 양옆으로 공백이 생김
         y = 0;
         vh = height;
 
+        // width 변경
         vw = dw * vh / dh;
         x = (width - vw) / 2;
     }

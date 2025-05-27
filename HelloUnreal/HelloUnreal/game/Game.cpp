@@ -80,10 +80,12 @@ void loadGame()
 			// 글자
 			setRGBA(bi->cS.r, bi->cS.g, bi->cS.b, bi->cS.a);
 			g->drawString(3, 3, bi->str);
-
-			Texture* tex = g->getTexture();
-			img->add(tex);
-			freeImage(tex);
+			
+			// ref카운팅 관리를 위해 free를
+			// ref카운트를 1로 유지시키기 위함
+			Texture* tex = g->getTexture();//+1
+			img->add(tex);//+2
+			freeImage(tex);//+1
 		}
 
 		imgBtn[i] = img;
@@ -110,7 +112,6 @@ void freeGame()
 	for (int i = 0; i < 3; i++)
 		delete imgBtn[i];
 	delete imgBtn;
-
 }
 
 void drawGame(float dt)
