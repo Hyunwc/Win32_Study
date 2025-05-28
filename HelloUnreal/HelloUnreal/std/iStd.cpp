@@ -1,6 +1,6 @@
 #include "iStd.h"
 
-int keydown;      // 00000000 00000000 00000000 00000011 
+int keydown, keystat;      // 00000000 00000000 00000000 00000011 
 iSize devSize;
 iRect viewport;
 
@@ -30,6 +30,7 @@ void loadApp(HWND hWnd, METHOD_VOID load, METHOD_VOID free,
 
 	// back buffer
 	keydown = keydown_none;
+	keystat = keydown_none;
 	devSize = iSizeMake(DEV_WIDTH, DEV_HEIGHT);
 	viewport = iRectMake(0, 0, 1, 1);
 
@@ -247,6 +248,7 @@ void drawImage(Texture* tex, float x, float y,
 	case BOTTOM | HCENTER:	x -= w / 2;	y -= h; break;
 	case BOTTOM | RIGHT:	x -= w;		y -= h; break;
 	}
+
 	iPoint p[3] = { {x, y}, {x + w, y}, 
 					{x, y + h} };
 

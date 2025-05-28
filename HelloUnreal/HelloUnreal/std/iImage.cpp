@@ -1,16 +1,19 @@
 #include "iImage.h"
 #include "iStd.h"
 
+
 iImage::iImage()
 {
-	array = new iArray(cb);
-	method = NULL;
-	animation = false;
-	_aniDt = 0.017f;
-	aniDt = 0.0f;
-	index = 0;
-	position = iPointZero;
+	array = new iArray(cbArray);
 	tex = NULL;
+	index = 0;
+	animation = false;
+	_aniDt = aniDtDefault;
+	aniDt = 0.0f;
+	position = iPointZero;
+	rate = 1.0f;
+	anc = TOP | LEFT;
+	reverse = REVERSE_NONE;
 }
 
 iImage::~iImage()
@@ -18,58 +21,60 @@ iImage::~iImage()
 	delete array;
 }
 
-void iImage::cb(void* data)
+void iImage::cbArray(void* data)
 {
 	Texture* tex = (Texture*)data;
 	freeImage(tex);
-	//delete tex;
 }
 
 void iImage::add(Texture* tex)
 {
 	array->add(tex);
-	// 이미지 추가됐으니 count + 1
-	tex->retainCount++;
+	tex->retainCount++; // 참조 수
 }
 
 void iImage::paint(float dt, iPoint position)
 {
 	if (animation)
 	{
+		// 시간이 흐르면서 지정한 시간이 초과하면 인덱스 증가
 		aniDt += dt;
 		if (aniDt >= _aniDt)
 		{
 			aniDt -= _aniDt;
 			index++;
-			if (index == array->count)
+			if (index > array->count - 1)
 			{
-				animation = false;
+				// 애니메이션 종료됐을때 콜백 호출
 				index = 0;
-				// 애니메이션 끝
 				if (method)
-					method(this);
+					method(parm);
 			}
 		}
 	}
 
 	tex = (Texture*)array->at(index);
-	iPoint p = this->position + position;
-	drawImage(tex, p.x, p.y, TOP | LEFT);
+	iPoint p = this->position * rate + position;
+	drawImage(tex, p.x, p.y,
+		0, 0, tex->width, tex->height,
+		rate, rate, 2, 0, anc, reverse);
 }
 
-void iImage::startAnimation(MethodImage cb)
+void iImage::startAnimation(iImageAnimation m, void* p)
 {
-	method = cb;
 	animation = true;
-	aniDt = 0.0f;
 	index = 0;
+	aniDt = 0.0f;
+
+	method = m;
+	parm = p;
 }
 
-iRect iImage::touchRect()
+iRect iImage::touchRect(iPoint position)
 {
-	iRect rt;
-	rt.origin = position;
-	rt.size = iSizeMake(tex->width, tex->height);
+	if (tex == NULL)
+		return iRectMake(0, 0, 0, 0);
 
-	return rt;
+	iPoint p = this->position + position;
+	return iRectMake(p.x, p.y, tex->width, tex->height);	
 }

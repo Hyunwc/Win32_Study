@@ -14,7 +14,9 @@
 #include "iFPS.h"
 #include "iSort.h"
 
-extern int keydown;
+// keydown 눌렀을 때 1번 발생
+// keystat 누르고 있을 때 계속 발생
+extern int keydown, keystat;
 extern iSize devSize;
 extern iRect viewport;
 
@@ -40,6 +42,7 @@ void drawRect(iRect rt);
 void fillRect(float x, float y, float width, float height);
 void fillRect(iRect rt);
 
+//int nextQuat(int x) { return x + 3 & ~3; }
 uint32 nextPot(uint32 x);
 
 Texture* createImage(const char* szFormat, ...);

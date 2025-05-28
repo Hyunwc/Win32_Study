@@ -57,14 +57,24 @@ iPoint iPoint::operator*(float f)
     r.x = x * f;
     r.y = y * f;
     return r;
-};
+}
+
+
 iPoint iPoint::operator/(float f)
 {
     iPoint r;
-    r.x = x * f;
-    r.y = y * f;
+    r.x = x / f;
+    r.y = y / f;
     return r;
-};
+}
+
+iPoint operator*(float f, const iPoint& p)
+{
+    iPoint r;
+    r.x = f * p.x;
+    r.y = f * p.y;
+    return r;
+}
 
 float iPoint::length()
 {

@@ -1,32 +1,41 @@
 #pragma once
 
 #include "iDefine.h"
-#include "iArray.h"
 #include "iPoint.h"
+#include "iRect.h"
+#include "iArray.h"
 
-class iImage;
-typedef void (*MethodImage)(iImage* img);
+#define aniDtDefault 0.017f
+
+typedef void (*iImageAnimation)(void* data);
 
 class iImage
 {
 public:
 	iImage();
 	virtual ~iImage();
-
-	static void cb(void* data);
+	static void cbArray(void* data);
 	void add(Texture* tex);
+
 	void paint(float dt, iPoint position);
 
-	void startAnimation(MethodImage cb);
+	// p : parm
+	void startAnimation(iImageAnimation m = NULL, void* p = NULL);
 
-	iRect touchRect();
-
+	iRect touchRect(iPoint position = iPointZero);
+	
 public:
-	iArray* array; // 텍스처가 몇개가 될지 모르니 리스트로
-	MethodImage method;
-	bool animation;
-	float aniDt, _aniDt; // 애니메이션 재생시간
-	int index; // 애니메이션 인덱스
-	iPoint position;
+	// 텍스처 0 1 2 있다면 012순서대로 재생
+	iArray* array; // 텍스처들 리스트에 보관
 	Texture* tex;
+	int index; 
+	bool animation;
+	float aniDt, _aniDt;
+	iPoint position;
+	float rate; 
+	int anc;
+	int reverse;
+
+	iImageAnimation method;
+	void* parm;
 };

@@ -25,6 +25,8 @@ struct iPoint
 iPoint iPointMake(float x, float y);
 #define iPointZero iPointMake(0, 0)
 
+iPoint operator*(float f, const iPoint& p);
+
 float iPointLength(const iPoint& p);
 float ipointDot(const iPoint& p0, const iPoint& p1);
 
