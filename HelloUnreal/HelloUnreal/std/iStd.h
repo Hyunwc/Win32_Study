@@ -13,6 +13,7 @@
 
 #include "iFPS.h"
 #include "iSort.h"
+#include "iShortestPath.h"
 
 // keydown 눌렀을 때 1번 발생
 // keystat 누르고 있을 때 계속 발생

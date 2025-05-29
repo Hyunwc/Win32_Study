@@ -16,6 +16,9 @@ enum Behave
 	BehaveMax
 };
 
+extern int tileX, tileY;
+extern uint8* tile; // 1:이동가능 9:이동불가
+
 // 백그라운드(길)
 void loadAnimatingBG();
 void freeAnimatingBG();
