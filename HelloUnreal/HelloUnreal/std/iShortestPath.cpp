@@ -148,9 +148,9 @@ void iShortestPath::run(iPoint start, iPoint end, iPoint* result, int& resultNum
 			{
 				p->value = curr->value + tile[idx];
 				// #2
-				//memcpy(p->path, curr->path, sizeof(int) * curr->pathNum);
+				memcpy(p->path, curr->path, sizeof(int) * curr->pathNum);
 				//p->path[curr->pathNum] = idx;
-				//p->pathNum = curr->pathNum + 1;
+				p->pathNum = curr->pathNum;
 			}
 		}
 	}
