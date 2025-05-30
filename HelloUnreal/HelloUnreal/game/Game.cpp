@@ -6,6 +6,7 @@
 #include "Memory.h"
 #include "PS.h"
 #include "Animating.h"
+#include "CtrlImage.h"
 
 ParticleSystem** _ps;
 ParticleSystem* ps;
@@ -18,13 +19,30 @@ void testGame();
 iImage** imgBtn;
 int selectedBtn;
 
+Texture* texBg; // 배경
+Texture* texMirror;
+
+//void testStr(char** t)
+//{
+//	printf("testStr = %s\n", *t);
+//
+//	char* s = new char[12];
+//	strcpy(s, "Hi World");
+//	delete* t;
+//	*t = s;
+//}
+
 void loadGame()
 {
-	/*iPoint p = iPointMake(1, 2);
-	p = p * 2;
-	
-	p = 2.0f * p;*/
+	/*char* t = new char[5];
+	strcpy(t, "hi");
+	testStr(&t);
 
+	printf("t = %s\n", t);*/
+
+	texBg = createImageFilter("assets/down1.png");
+	setImageFilter(imageFilterMirror);
+	texMirror = createImageFilter("assets/down1.png");
 
 #if 1
 	loadAnimating();
@@ -106,6 +124,8 @@ void loadGame()
 
 void freeGame()
 {
+	freeImage(texBg);
+	freeImage(texMirror);
 #if 1
 	freeAnimating();
 	return;
@@ -133,7 +153,9 @@ void drawGame(float dt)
 	clear();
 
 	setRGBA(1, 1, 1, 1);
-
+	drawImage(texBg, 0, 200, BOTTOM | LEFT);
+	drawImage(texMirror, 0, 200, TOP | LEFT);
+	
 	/*static float delta = 0.0f;
 	delta += dt;
 	iPoint off = iPointMake(50 * sin(delta), 0);

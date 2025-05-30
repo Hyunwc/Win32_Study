@@ -26,6 +26,9 @@ public:
 	//void run(int start, int end, int* result, int& resultNum);
 	void run(iPoint start, iPoint end, iPoint* result, int& resultNum);
 
+private:
+	void remove(int* pat, int& pathNum);
+
 public:
 	uint8* tile;
 	int tileX, tileY, tileW, tileH;

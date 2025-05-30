@@ -443,7 +443,7 @@ float clamp(float f, float min, float max)
 	return f;
 }
 
-void move(iPoint* cp, const iPoint* tp, const iPoint& mp)
+bool move(iPoint* cp, const iPoint* tp, const iPoint& mp)
 {
 	if (cp->x < tp->x)
 	{
@@ -470,6 +470,8 @@ void move(iPoint* cp, const iPoint* tp, const iPoint& mp)
 		if (cp->y < tp->y)
 			cp->y = tp->y;
 	}
+
+	return (cp->x == tp->x && cp->y == tp->y);
 }
 
 char* loadFile(int& len, const char* szFormat, ...)

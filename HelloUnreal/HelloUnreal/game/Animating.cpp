@@ -5,8 +5,6 @@ AIRobot** ai;
 int selectedAI;
 
 iShortestPath* sp;
-iPoint* path;
-int pathNum;
 
 void loadAnimating()
 {
@@ -24,8 +22,6 @@ void loadAnimating()
 	selectedAI = -1;
 
 	sp = new iShortestPath();
-	path = new iPoint[tileX * tileY];
-	pathNum = 0;
 }
 
 void freeAnimating()
@@ -39,7 +35,6 @@ void freeAnimating()
 	delete ai;
 
 	delete sp;
-	delete path;
 }
 
 void drawAnimating(float dt)
@@ -75,14 +70,6 @@ void drawAnimating(float dt)
 	sort->update();
 
 	drawAnimatingBG(dt);
-
-	setRGBA(0, 0, 0, 1);
-	for (int i = 0; i < pathNum; i++)
-	{
-		iPoint& p  = path[i];
-		fillRect(p.x, p.y, 10, 10);
-	}
-	setRGBA(1, 1, 1, 1);
 
 	for (int i = 0; i < 5; i++)
 	{
@@ -155,19 +142,8 @@ void keyAnimating(iKeyStat stat, iPoint point)
 		}
 		else // 선택이됨
 		{
-			//AIRobot* a = ai[selectedAI];
-			//// ai의 현재위치
-			//int x = ((int)a->position.x) / 64;
-			//int y = ((int)a->position.y) / 64;
-			//int s = tileX * y + x;
-
-			//x = ((int)point.x) / 64;
-			//y = ((int)point.y) / 64;
-			//int e = tileX * y + x;
-
-			//runSP(tile, tileX, tileY, s, e, path, pathNum);
-			sp->set(tile, tileX, tileY, 64, 64);
-			sp->run(ai[selectedAI]->position, point, path, pathNum);
+			void testArrive(AIRobot * ai);
+			ai[selectedAI]->gogo(point, testArrive);
 			selectedAI = -1;
 		}
 		break;
@@ -282,6 +258,9 @@ AIRobot::AIRobot(int index)
 	speed = 300;
 
 	behave = BehaveWait;
+
+	path = new iPoint[tileX * tileY];
+	pathNum = 0;
 }
 
 AIRobot::~AIRobot()
@@ -293,12 +272,45 @@ AIRobot::~AIRobot()
 
 void AIRobot::paint(float dt)
 {
+	// draw
+#if 1
+	setRGBA(0, 0, 0, 1);
+	for (int i = 0; i < pathNum; i++)
+	{
+		iPoint& p = path[i];
+		fillRect(p.x, p.y, 10, 10);
+	}
+	setRGBA(1, 1, 1, 1);
+#endif
+
 	imgs[behave]->rate = rate;
 	imgs[behave]->paint(dt, position);
 
 	setRGBA(1, 1, 1, 1);
 	fillRect(position.x - 30, position.y - 1, 60, 2);
 	fillRect(position.x - 1, position.y - 30, 2, 60);
+
+	// ctrl
+	if (pathNum)
+	{
+		iPoint targetPos = path[pathIndex]; // 내가 가야할 곳
+		iPoint v = targetPos - position;
+		v.loadIdentity();
+		if (move(&position, &targetPos, v * 300 * dt))
+		{
+			pathIndex++;
+			// 모든 경로를 다갔다면?
+			if (pathIndex == pathNum)
+			{
+				pathNum = 0;
+				if (method)
+					method(this);
+			}
+		}
+	}
+	
+	pathNum;
+	pathIndex; // path[0] ~ path[pathNum - 1]
 }
 
 void AIRobot::cbRepair(void* data)
@@ -320,4 +332,25 @@ void AIRobot::cbRepair(void* data)
 iRect AIRobot::touchRect()
 {
 	return imgs[behave]->touchRect(position);
+}
+
+void AIRobot::gogo(iPoint point, MethodAIRobotArrive m)
+{
+	sp->set(tile, tileX, tileY, 64, 64);
+	sp->run(position, point, path, pathNum);
+	// 구했으니 0부터 출발
+	pathIndex = 0;
+	method = m;
+}
+
+void testArrive(AIRobot* ai)
+{
+	int i;
+	for (i = 0; i < 5; i++)
+	{
+		if (::ai[i] == ai)
+			break;
+	}
+	printf("ai[%d] 수리해\n", i);
+	ai->imgs[ai->behave = BehaveRepair]->startAnimation(AIRobot::cbRepair, ai);
 }

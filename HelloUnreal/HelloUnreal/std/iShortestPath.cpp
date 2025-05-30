@@ -156,16 +156,6 @@ void iShortestPath::run(iPoint start, iPoint end, iPoint* result, int& resultNum
 	}
 
 	Path* p = &path[e];
-	int j = p->pathNum - 1;
-	for (int i = 1; i < j; i++)
-	{
-		int x = p->path[i] % tileX;
-		int y = p->path[i] / tileX;
-		result[i] = iPointMake(tileW * x + tileW / 2, tileH * y + tileH / 2);
-	}
-	result[0] = start;
-	result[j] = end;
-	resultNum = p->pathNum;
 
 	// result
 	/*Path* p = &path[e];
@@ -179,53 +169,86 @@ void iShortestPath::run(iPoint start, iPoint end, iPoint* result, int& resultNum
 	result[0] = start;
 	result[resultNum - 1] = end;*/
 
-#if 0// 대각선 방문지 처리
-	int n = p->pathNum - 2;
-	for (int i = 0; i < n; i++)
-	{
-		int cx = p->path[i] % tileX;
-		int cy = p->path[i] / tileX;
-		int nx = p->path[i + 2] % tileX;
-		int ny = p->path[i + 2] / tileX;
-		if (abs(cx - nx) == 1 && abs(cy - ny) == 1)
-		{
-			// a ~ b : b - a + 1
-			int len = p->pathNum - 1 - i - 1 + 1;// a=i+1, b=p->pathNum-1
-			memcpy(&p->path[i + 1], &p->path[i + 2], sizeof(int) * len);
-			p->pathNum--;
-			n--;
-			//i--;
-		}
-	}
-#elif 0
+	//remove(p->path, p->pathNum);
+
 	int j = p->pathNum - 1;
 	for (int i = 1; i < j; i++)
 	{
 		int x = p->path[i] % tileX;
 		int y = p->path[i] / tileX;
 		result[i] = iPointMake(tileW * x + tileW / 2,
-			tileH * y + tileH / 2);
+							   tileH * y + tileH / 2);
 	}
+
 	result[0] = start;
 	result[j] = end;
 	resultNum = p->pathNum;
-#endif
 }
 
+void iShortestPath::remove(int* path, int& pathNum)
+{
+    // 대각선 처리
+	int n = pathNum - 2;
+	for (int i = 0; i < n; i++)
+	{
+		int cx = path[i] % tileX;
+		int cy = path[i] / tileX;
+		int nx = path[i + 2] % tileX;
+		int ny = path[i + 2] / tileX;
+		if (abs(cx - nx) == 1 && abs(cy - ny) == 1)
+		{
+			// a ~ b : b - a + 1
+			int len = pathNum - 1 - i - 2 + 1;// a=i+2, b=p->pathNum-1
+			memcpy(&path[i + 1], &path[i + 2], sizeof(int) * len);
+			pathNum--;
+			n--;
+			//i--;
+		}
+	}
 
+	// 직선 사이 중복 처리
+	for (int i = 0; i < n; i++)
+	{
+		int cx = path[i] % tileX;
+		int cy = path[i] / tileX;
+		// 바로 다음 경로들
+		int nx = path[i + 1] % tileX;
+		int ny = path[i + 1] / tileX;
 
+		bool sameX = (cx == nx);
 
+		if (sameX == false)
+		{
+			// 대각선까지 중복되는걸 제거하고 싶지만, 패스
+			if (cy != ny)
+				continue; 
+		}
 
+		int j;
 
+		for (j = i + 2; j < pathNum; j++)
+		{
+			if (sameX)
+			{
+				if (cx != path[j] % tileX)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (cy != path[j] / tileX)
+				{
+					break;
+				}
+			}
+		}
 
-
-
-
-
-
-
-
-
+		// 제거대상 i + 1 ~ j - 1;
+		int len = pathNum - 1 - j + 1; // j, pathNum - 1
+		memcpy(&path[i + 1], &path[j], sizeof(int) * len);
+	}
+}
 
 
 
