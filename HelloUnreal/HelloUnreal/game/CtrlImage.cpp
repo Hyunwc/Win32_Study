@@ -18,6 +18,9 @@ Texture* createImageFilter(const char* szFormat, ...)
 	//Image* img = Image::FromFile(path);
 	Bitmap* bmp = Bitmap::FromFile(path);
 	Image* img = bmp;
+	
+	//RECT rtWin32Api;
+	//Rect rtGdiplus;// Windows XP SP2 2004년 4월 20일
 
 	Rect rt;
 	rt.X = 0;
@@ -59,8 +62,8 @@ void imageFilterGrey(uint8* bgra, int width, int height, int stride)
 		{
 			uint8* c = &bgra[stride * 4 * j + 4 * i];
 			// 회색처리
-			uint8 grey = c[0] * 0.3f + c[1] * 0.4f + c[2] * 0.3f; // blue
-			c[0] = grey;
+			uint8 grey = c[0] * 0.3f + c[1] * 0.4f + c[2] * 0.3f; 
+			c[0] = grey; // blue
 			c[1] = grey; // green
 			c[2] = grey; // red
 		}
@@ -96,7 +99,6 @@ void imageFilterMirror(uint8* bgra, int width, int height, int stride)
 
 			s[3] = linear(0xFF, 0x00, (float)j / h);
 			d[3] = 0xFF - s[3];
-
 			//uint8 grey = c[0] * 0.3f + c[1] * 0.4f + c[2] * 0.3f; // blue
 			//c[0] = grey;
 			//c[1] = grey; // green

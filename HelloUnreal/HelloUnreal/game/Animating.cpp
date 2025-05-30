@@ -46,7 +46,9 @@ void drawAnimating(float dt)
 		int y = i / tx;
 		printf("%d => (%d, %d)\n", i, x, y);
 	}*/
+
 	// draw
+
 	/*for (int j = 0; j < tileY; j++)
 	{
 		for (int i = 0; i < tileX; i++)
