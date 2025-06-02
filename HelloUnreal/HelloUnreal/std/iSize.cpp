@@ -1,5 +1,12 @@
 #include "iSize.h"
 
+iSize& iSize::operator=(const iPoint& p)
+{
+	width = p.x;
+	height = p.y;
+	return *this;
+}
+
 iSize& iSize::operator+=(const iPoint& p)
 {
 	width += p.x;

@@ -12,6 +12,8 @@ struct iPoint
 	iPoint& operator += (const iPoint& p);
 	iPoint& operator -= (const iPoint& p);
 
+	//iPoint operator - (const iRect& p);
+
 	iPoint operator - (const iPoint& p);
 	iPoint operator + (const iPoint& p);
 
@@ -24,6 +26,7 @@ struct iPoint
 
 iPoint iPointMake(float x, float y);
 #define iPointZero iPointMake(0, 0)
+void iPointAbs(iPoint& p);
 
 iPoint operator*(float f, const iPoint& p);
 

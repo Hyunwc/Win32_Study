@@ -93,6 +93,7 @@ void iShortestPath::run(iPoint start, iPoint end, iPoint* result, int& resultNum
 	{
 		int index = -1;
 		int m = Inf;
+
 		for (int i = 0; i < len; i++)
 		{
 			Path* p = &path[i];
@@ -104,6 +105,7 @@ void iShortestPath::run(iPoint start, iPoint end, iPoint* result, int& resultNum
 				index = i;
 			}
 		}
+
 		if (index == -1)
 			break;
 

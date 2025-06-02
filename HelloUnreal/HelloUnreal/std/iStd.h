@@ -31,6 +31,7 @@ Graphics* getGraphics();
 void setGraphics(Graphics* g);
 
 void setRGBA(float r, float g, float b, float a);
+void getRGBA(float& r, float& g, float& b, float& a);
 
 void clear();
 
@@ -57,7 +58,10 @@ void drawImage(Texture* tex, float x, float y,
 
 void setStringSize(float size);
 void setStringRGBA(float r, float g, float b, float a);
-void drawString(float x, float y, const char* szFormat, ...);
+void getStringRGBA(float& r, float& g, float& b, float& a);
+iRect rectOfString(const char* szFormat, ...);
+void _drawString(float x, float y, const char* szFormat, ...);
+void drawString(float x, float y, int anc, const char* szFormat, ...);
 
 wchar_t* utf8_to_utf16(const char* szFormat, ...);
 char* utf16_to_utf8(const wchar_t* wStr);

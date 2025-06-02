@@ -7,6 +7,7 @@
 #include "PS.h"
 #include "Animating.h"
 #include "CtrlImage.h"
+#include "Oops.h"
 
 ParticleSystem** _ps;
 ParticleSystem* ps;
@@ -21,6 +22,22 @@ int selectedBtn;
 
 Texture* texBg; // 배경
 Texture* texMirror;
+
+void printY(const char* szFormat, ...)
+{
+	char szText[512];
+	va_start_end(szFormat, szText);
+
+	printf("%s\n", szText);
+}
+
+void printX(const char* szFormat, ...)
+{
+	char szText[512];
+	va_start_end(szFormat, szText);
+
+	printY(szText);
+}
 
 //void testStr(char** t)
 //{
@@ -39,6 +56,10 @@ void loadGame()
 	testStr(&t);
 
 	printf("t = %s\n", t);*/
+
+	
+	loadOops();
+	return;
 
 	texBg = createImageFilter("assets/down1.png");
 	setImageFilter(imageFilterMirror);
@@ -124,6 +145,9 @@ void loadGame()
 
 void freeGame()
 {
+	freeOops();
+	return;
+
 	freeImage(texBg);
 	freeImage(texMirror);
 #if 1
@@ -151,6 +175,9 @@ void drawGame(float dt)
 {
 	setRGBA(0, 0, 0, 1);
 	clear();
+
+	drawOops(dt);
+	return;
 
 	setRGBA(1, 1, 1, 1);
 	drawImage(texBg, 0, 200, BOTTOM | LEFT);
@@ -197,6 +224,9 @@ void drawGame(float dt)
 
 void keyGame(iKeyStat stat, iPoint point)
 {
+	keyOops(stat, point);
+	return;
+
 #if 1
 	keyAnimating(stat, point);
 	return;

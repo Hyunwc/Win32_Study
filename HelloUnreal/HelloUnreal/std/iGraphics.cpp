@@ -131,6 +131,6 @@ void iGraphics::drawString(float x, float y, const char* szFormat, ...)
 
 	Graphics* bk = getGraphics();
 	setGraphics(g);
-	::drawString(x, y, szText);
+	::drawString(x, y, TOP | LEFT, szText);
 	setGraphics(bk);
 }
