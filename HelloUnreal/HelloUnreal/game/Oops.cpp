@@ -251,9 +251,11 @@ void findPixel(UINT8* bgra,int stride, int x, int y)
 void findPixel(UINT8* bgra, int stride, int x, int y)
 {
 	visit[stride * y + x] = true;
-	for (;;)
+	for (int i = stride * y + 4 * x + 3;;)
 	{
-		
+		if (visit[i]) continue;
+
+		// left top right bottom 업데이트
 	}
 	rtClick = iRectMake(left, top, right - left + 1, bottom - top + 1);
 }
