@@ -59,6 +59,10 @@ iRect dragRect(const iPoint& s, const iPoint& e)
 
 void drawOops(float dt)
 {
+	// back buffer
+	Graphics* bk = getGraphics();
+	setGraphics(gOops);
+
 	const char* s = "한글TEST";
 	setStringRGBA(1, 1, 1, 1);
 	drawString(0, 0, TOP | LEFT, s);
@@ -82,15 +86,7 @@ void drawOops(float dt)
 		printf("srt[%d] = (%.0f, %.0f)\n", i, rt.size.width, rt.size.height);
 	}
 
-	return;
-
-	Graphics* bk = getGraphics();
-	setGraphics(gOops);
-
-	setStringSize(30);
-	setStringRGBA(1, 1, 1, 1);
-	drawString(100, 100, TOP | LEFT, "한글입니다.");
-
+	// restore - front buffer
 	setGraphics(bk);
 	setRGBA(1, 1, 1, 1);
 	drawImage(texOops, 0, 0, TOP | LEFT);
@@ -156,7 +152,7 @@ iRect rectOfString(Bitmap* bmp, iPoint s, iPoint e)
 	// right -> left
 	int right = bmp->GetWidth();
 	int sx = x - 1;
-	for (int i = x + w; i > sx; i--)
+	for (int i = x + w - 1; i > sx; i--)
 	{
 		bool found = false;
 		int dh = y + h;
@@ -229,7 +225,7 @@ iRect rectOfString(Bitmap* bmp, iPoint s, iPoint e)
 
 int left = 0, right = 1024, top = 0, bottom = 1024;
 bool* visit;
-
+#if 0
 void findPixel(UINT8* bgra,int stride, int x, int y)
 {
 	visit[stride * y + x] = true;
@@ -248,9 +244,20 @@ void findPixel(UINT8* bgra,int stride, int x, int y)
 	if (!visit[index] && bgra[index])
 		findPixel(bgra, stride, x, y - 1);
 	index = stride * (y + 1) + 4 * x + 3;
-	if (! visit[index] && bgra[index])
+	if (!visit[index] && bgra[index])
 		findPixel(bgra, stride, x, y + 1);
 }
+#else
+void findPixel(UINT8* bgra, int stride, int x, int y)
+{
+	visit[stride * y + x] = true;
+	for (;;)
+	{
+		
+	}
+	rtClick = iRectMake(left, top, right - left + 1, bottom - top + 1);
+}
+#endif
 
 iRect rectOfString(Bitmap* bmp, iPoint p)
 {

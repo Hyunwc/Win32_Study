@@ -25,6 +25,7 @@ Q) include ", < 구분
 Q) 디버깅 nan, inf 언제 등장
 Q) 링크리스트 헤드타입
 Q) WM_SIZING reinterpret_cast
+Q) iPointAbs(수식) 왜 에러 ?
 
 #endif
 
