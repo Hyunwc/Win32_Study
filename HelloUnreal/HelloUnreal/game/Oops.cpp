@@ -322,7 +322,7 @@ void findPixel(UINT8* bgra, int stride, int w, int h, int x, int y, bool linked)
 {
 	if (linked == false)
 	{
-		_findPixel(bgra, stride, w, h, x, y);
+		_findPixel(bgra, stride, w, h, x, y); // left, right, top, bottom
 		return;
 	}
 
