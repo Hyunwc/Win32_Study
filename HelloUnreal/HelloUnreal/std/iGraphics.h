@@ -30,7 +30,7 @@ public:
 		float rateX, float rateY,
 		int xyz, float degree, int anc, int reverse = REVERSE_NONE);
 
-	void drawString(float x, float y, const char* szFormat, ...);
+	void drawString(float x, float y, int anc, const char* szFormat, ...);
 
 public:
 	Bitmap* bmp;

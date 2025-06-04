@@ -60,34 +60,43 @@ iRect dragRect(const iPoint& s, const iPoint& e)
 void drawOops(float dt)
 {
 	// back buffer
-	Graphics* bk = getGraphics();
-	setGraphics(gOops);
-
-	const char* s = "한글TEST";
-	setStringRGBA(1, 1, 1, 1);
-	drawString(0, 0, TOP | LEFT, s);
-
-	setRGBA(1, 0, 0, 1);
-	iRect rt = rectOfString(s);
-	drawRect(rt);
-
-	const char* str[] = {
-		"부산광역시",
-		"해운대구",
-		"센텀동로99",
-		"벽산e센텀클래스원",
-		"506호"
-	};
-	
-	for (int i = 0; i < 5; i++)
+	static bool bDraw = false;
+	if (bDraw == false)
 	{
-		drawString(300, 20 + 40 * i, TOP | RIGHT, str[i]);
-		iRect rt = rectOfString(str[i]);
-		printf("srt[%d] = (%.0f, %.0f)\n", i, rt.size.width, rt.size.height);
-	}
+		bDraw = true;
+		Graphics* bk = getGraphics();
+		setGraphics(gOops);
 
-	// restore - front buffer
-	setGraphics(bk);
+		setRGBA(0, 0, 0, 0);
+		clear();
+
+		const char* s = "한글TEST";
+		setStringRGBA(1, 1, 1, 1);
+		drawString(0, 0, TOP | LEFT, s);
+
+		setRGBA(1, 0, 0, 1);
+		iRect rt = rectOfString(s);
+		drawRect(rt);
+
+		const char* str[] = {
+			"부산광역시",
+			"해운대구",
+			"센텀동로99",
+			"벽산e센텀클래스원",
+			"506호"
+		};
+
+		for (int i = 0; i < 5; i++)
+		{
+			drawString(300, 20 + 40 * i, TOP | RIGHT, str[i]);
+			iRect rt = rectOfString(str[i]);
+			printf("srt[%d] = (%.0f, %.0f)\n", i, rt.size.width, rt.size.height);
+		}
+
+		// restore - front buffer(위에서 작업 내용 전면 버퍼에)
+		setGraphics(bk);
+	}
+	
 	setRGBA(1, 1, 1, 1);
 	drawImage(texOops, 0, 0, TOP | LEFT);
 
@@ -128,7 +137,7 @@ iRect rectOfString(Bitmap* bmp, iPoint s, iPoint e)
 
 	int x = rtSrc.origin.x, y = rtSrc.origin.y;
 	int w = rtSrc.size.width, h = rtSrc.size.height;
-	int left = 0;
+	int left = s.x;
 	// left -> right
 	for (int i = x; i < w; i++)
 	{
@@ -224,7 +233,8 @@ iRect rectOfString(Bitmap* bmp, iPoint s, iPoint e)
 }
 
 int left = 0, right = 1024, top = 0, bottom = 1024;
-bool* visit;
+bool* visit, * canGo;
+
 #if 0
 void findPixel(UINT8* bgra,int stride, int x, int y)
 {
@@ -248,16 +258,91 @@ void findPixel(UINT8* bgra,int stride, int x, int y)
 		findPixel(bgra, stride, x, y + 1);
 }
 #else
-void findPixel(UINT8* bgra, int stride, int x, int y)
+void _findPixel(UINT8* bgra, int stride, int w, int h, int x, int y)
 {
-	visit[stride * y + x] = true;
-	for (int i = stride * y + 4 * x + 3;;)
-	{
-		if (visit[i]) continue;
+	// initialize
+	left = x;
+	right = x;
+	top = y;
+	bottom = y;
 
-		// left top right bottom 업데이트
+	// logic
+	canGo[w * y + x] = true;
+
+	for (;;)
+	{
+		bool exist = false;
+		for (int j = 0; j < h; j++)
+		{
+			for (int i = 0; i < w; i++)
+			{
+				// color가 존재하지 않다면 패스
+				if (canGo[w * j + i] == false
+					|| bgra[stride * j + 4 * i + 3] == 0)
+					continue;
+				
+				canGo[w * j + i] = false;
+				visit[w * j + i] = true;
+				exist = true;
+				
+				if (i < left)	left = i;
+				if (i > right)	right = i;
+				if (j < top)	top = j;
+				if (j > bottom) bottom = j;
+
+				if (i > 0 && visit[w * j + i - 1] == false)
+					canGo[w * j + i - 1] = true;
+				if (i < w - 1 && visit[w * j + i + 1] == false)
+					canGo[w * j + i + 1] = true;
+				if (j > 0 && visit[w * (j - 1) + i] == false)
+					canGo[w * (j - 1) + i] = true;
+				if (i < h - 1 && visit[w * (j + 1) + i] == false)
+					canGo[w * (j + 1) + i] = true;
+			}
+		}
+		// canGo :: visit
+
+		// -1, +1, -w, +w canGo = true
+		if (exist == false)
+			break;
 	}
-	rtClick = iRectMake(left, top, right - left + 1, bottom - top + 1);
+
+	//rtClick = iRectMake(left, top, right - left + 1, bottom - top + 1);
+}
+
+// 1) 갈수 있는 곳을 지정(canGo)을 다음 프레임에서 호출해야 하는데, 의도치않게 실행
+// 2) 'ㅅ'과 관련된 문자의 경우, 정상적으로 구하지 못하는 문제
+
+void findPixel(UINT8* bgra, int stride, int w, int h, int x, int y, bool linked)
+{
+	if (linked == false)
+	{
+		_findPixel(bgra, stride, w, h, x, y);
+		return;
+	}
+
+	for (;;)
+	{
+		bool theEnd = true;
+
+		_findPixel(bgra, stride, w, h, x, y);
+		for (int j = top; j < bottom; j++)
+		{
+			for (int i = left; i < right; i++)
+			{
+				if (visit[w * j + i] == false &&
+					bgra[stride * j + 4 * i + 3])
+				{
+					x = i, y = j;
+					theEnd = false;
+					break;
+				}
+			}
+		}
+
+		if (theEnd)
+			break;
+	}
 }
 #endif
 
@@ -277,11 +362,16 @@ iRect rectOfString(Bitmap* bmp, iPoint p)
 	////////////////////////////////
 	// 사용되는 영역
 	visit = new bool[1024 * 1024];
+	canGo = new bool[1024 * 1024];
 	memset(visit, false, sizeof(bool) * 1024 * 1024);
+	memset(canGo, false, sizeof(bool) * 1024 * 1024);
 
-	findPixel(bgra, stride, p.x, p.y);
+	int w = rt.Width, h = rt.Height;
+
+	findPixel(bgra, stride, w, h, p.x, p.y, true);
 
 	delete visit;
+	delete canGo;
 	////////////////////////////////
 
 	bmp->UnlockBits(&bmpData);

@@ -8,6 +8,7 @@
 #include "Animating.h"
 #include "CtrlImage.h"
 #include "Oops.h"
+#include "Comp.h"
 
 ParticleSystem** _ps;
 ParticleSystem* ps;
@@ -56,16 +57,17 @@ void loadGame()
 	testStr(&t);
 
 	printf("t = %s\n", t);*/
-
-	
-	loadOops();
-	return;
-
 	texBg = createImageFilter("assets/down1.png");
 	setImageFilter(imageFilterMirror);
 	texMirror = createImageFilter("assets/down1.png");
 
 #if 1
+	loadComp();
+	return;
+#elif 0	
+	loadOops();
+	return;
+#elif0
 	loadAnimating();
 	return;
 #elif 0
@@ -128,7 +130,7 @@ void loadGame()
 
 			// 글자
 			setRGBA(bi->cS.r, bi->cS.g, bi->cS.b, bi->cS.a);
-			g->drawString(3, 3, bi->str);
+			g->drawString(3, 3, TOP|LEFT, bi->str);
 			
 			// ref카운팅 관리를 위해 free를
 			// ref카운트를 1로 유지시키기 위함
@@ -145,12 +147,15 @@ void loadGame()
 
 void freeGame()
 {
-	freeOops();
-	return;
-
 	freeImage(texBg);
 	freeImage(texMirror);
 #if 1
+	freeComp();
+	return;
+#elif 0
+	freeOops();
+	return;
+#elif 0
 	freeAnimating();
 	return;
 #elif 0
@@ -176,9 +181,6 @@ void drawGame(float dt)
 	setRGBA(0, 0, 0, 1);
 	clear();
 
-	drawOops(dt);
-	return;
-
 	setRGBA(1, 1, 1, 1);
 	drawImage(texBg, 0, 200, BOTTOM | LEFT);
 	drawImage(texMirror, 0, 200, TOP | LEFT);
@@ -194,6 +196,12 @@ void drawGame(float dt)
 	}*/
 
 #if 1
+	drawComp(dt);
+	return;
+#elif 0
+	drawOops(dt);
+	return;
+#elif 0
 	drawAnimating(dt);
 	return;
 #elif 0
@@ -224,10 +232,15 @@ void drawGame(float dt)
 
 void keyGame(iKeyStat stat, iPoint point)
 {
-	keyOops(stat, point);
-	return;
+	
 
 #if 1
+	keyComp(stat, point);
+	return;
+#elif 0
+	keyOops(stat, point);
+	return;
+#elif 0
 	keyAnimating(stat, point);
 	return;
 #elif 0
