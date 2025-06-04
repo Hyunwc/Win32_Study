@@ -63,10 +63,12 @@ void drawOops(float dt)
 	static bool bDraw = false;
 	if (bDraw == false)
 	{
+		// back buffer
 		bDraw = true;
 		Graphics* bk = getGraphics();
 		setGraphics(gOops);
 
+		// 화면을 비우고
 		setRGBA(0, 0, 0, 0);
 		clear();
 
@@ -135,14 +137,17 @@ iRect rectOfString(Bitmap* bmp, iPoint s, iPoint e)
 	uint8* bgra = (uint8*)bmpData.Scan0;
 	int stride = bmpData.Stride;
 
+	// 드래그 영역
 	int x = rtSrc.origin.x, y = rtSrc.origin.y;
 	int w = rtSrc.size.width, h = rtSrc.size.height;
-	int left = s.x;
+	// 탐색할 왼쪽 시작위치
+	int left = 0;
 	// left -> right
 	for (int i = x; i < w; i++)
 	{
 		bool found = false;
 		int dh = y + h;
+		// 높이 탐색
 		for (int j = y; j < dh; j++)
 		{
 			// stride = 버퍼 크기만큼 저장
@@ -257,7 +262,7 @@ void findPixel(UINT8* bgra,int stride, int x, int y)
 	if (!visit[index] && bgra[index])
 		findPixel(bgra, stride, x, y + 1);
 }
-#else
+#elif 1
 void _findPixel(UINT8* bgra, int stride, int w, int h, int x, int y)
 {
 	// initialize
@@ -296,7 +301,7 @@ void _findPixel(UINT8* bgra, int stride, int w, int h, int x, int y)
 					canGo[w * j + i + 1] = true;
 				if (j > 0 && visit[w * (j - 1) + i] == false)
 					canGo[w * (j - 1) + i] = true;
-				if (i < h - 1 && visit[w * (j + 1) + i] == false)
+				if (j < h - 1 && visit[w * (j + 1) + i] == false)
 					canGo[w * (j + 1) + i] = true;
 			}
 		}
@@ -368,7 +373,9 @@ iRect rectOfString(Bitmap* bmp, iPoint p)
 
 	int w = rt.Width, h = rt.Height;
 
-	findPixel(bgra, stride, w, h, p.x, p.y, true);
+	//findPixel(bgra, stride, w, h, p.x, p.y, true);
+	// 연결 되어있지 않은데도 포함이 되는 버그
+	findPixel(bgra, stride, w, h, p.x, p.y, false);
 
 	delete visit;
 	delete canGo;

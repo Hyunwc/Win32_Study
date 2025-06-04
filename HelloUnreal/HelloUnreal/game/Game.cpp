@@ -61,13 +61,13 @@ void loadGame()
 	setImageFilter(imageFilterMirror);
 	texMirror = createImageFilter("assets/down1.png");
 
-#if 1
+#if 0
 	loadComp();
 	return;
-#elif 0	
+#elif 1	
 	loadOops();
 	return;
-#elif0
+#elif 0
 	loadAnimating();
 	return;
 #elif 0
@@ -149,10 +149,10 @@ void freeGame()
 {
 	freeImage(texBg);
 	freeImage(texMirror);
-#if 1
+#if 0
 	freeComp();
 	return;
-#elif 0
+#elif 1
 	freeOops();
 	return;
 #elif 0
@@ -181,9 +181,9 @@ void drawGame(float dt)
 	setRGBA(0, 0, 0, 1);
 	clear();
 
-	setRGBA(1, 1, 1, 1);
+	/*setRGBA(1, 1, 1, 1);
 	drawImage(texBg, 0, 200, BOTTOM | LEFT);
-	drawImage(texMirror, 0, 200, TOP | LEFT);
+	drawImage(texMirror, 0, 200, TOP | LEFT);*/
 	
 	/*static float delta = 0.0f;
 	delta += dt;
@@ -195,10 +195,10 @@ void drawGame(float dt)
 		imgBtn[i]->paint(dt, off);
 	}*/
 
-#if 1
+#if 0
 	drawComp(dt);
 	return;
-#elif 0
+#elif 1
 	drawOops(dt);
 	return;
 #elif 0
@@ -234,10 +234,10 @@ void keyGame(iKeyStat stat, iPoint point)
 {
 	
 
-#if 1
+#if 0
 	keyComp(stat, point);
 	return;
-#elif 0
+#elif 1
 	keyOops(stat, point);
 	return;
 #elif 0
