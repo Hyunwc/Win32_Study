@@ -11,6 +11,9 @@
 using namespace Gdiplus;
 #pragma comment (lib, "Gdiplus.lib")
 
+#include <gl/GLU.h>
+#pragma comment(lib, "opengl32")
+
 #include <stdio.h>
 //#include <iostream>
 #include <stdlib.h>
@@ -78,7 +81,7 @@ struct Texture
 {
 	// openGL : unsigned int
 	// gdi+ : Image(클래스 name)
-	void* texID; 
+	uint32 texID; 
 	int width, height;
 	int potWidth, potHeight;
 	int retainCount;

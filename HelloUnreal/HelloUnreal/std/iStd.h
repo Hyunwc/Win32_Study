@@ -11,6 +11,7 @@
 #include "iGraphics.h"
 #include "iImage.h"
 #include "iPopup.h"
+#include "iOpenGL.h"
 
 #include "iFPS.h"
 #include "iSort.h"
@@ -28,13 +29,12 @@ void freeApp();
 void drawApp(float dt);
 void keyApp(iKeyStat stat, iPoint point);
 
-Graphics* getGraphics();
-void setGraphics(Graphics* g);
-
 void setRGBA(float r, float g, float b, float a);
 void getRGBA(float& r, float& g, float& b, float& a);
 
 void clear();
+
+void setLineWidth(float width);
 
 void drawLine(float x0, float y0, float x1, float y1);
 void drawLine(iPoint p0, iPoint p1);
@@ -47,6 +47,15 @@ void fillRect(iRect rt);
 
 //int nextQuat(int x) { return x + 3 & ~3; }
 uint32 nextPot(uint32 x);
+
+uint8* bmp2rgba(Bitmap* bmp, int& width, int& height);
+Texture* createImageWithRGBA(uint8* rgba, int width, int height);
+
+typedef void (*MethodImageFilter)(uint8* bgra, int width, int height, int stride);
+void setImageFilter(MethodImageFilter method);
+Texture* createImageFilter(const char* szFormat, ...);
+void imageFilterGrey(uint8* bgra, int width, int height, int stride);
+void imageFilterMirror(uint8* bgra, int width, int height, int stride);
 
 Texture* createImage(const char* szFormat, ...);
 void freeImage(Texture* tex);
