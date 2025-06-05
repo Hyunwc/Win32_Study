@@ -62,13 +62,14 @@ void resizeOpenGL(int width, int height)
 
 void swapBuffer()
 {
+	// 버퍼 교체 (더블 버퍼링)
 	SwapBuffers(hdc);
 }
 
 void setMakeCurrent(bool enable)
 {
 	if (enable)
-		wglMakeCurrent(hdc, hrc);
+		wglMakeCurrent(hdc, hrc); // OpenGL을 사용하겠다
 	else
-		wglMakeCurrent(NULL, NULL); // 사용x
+		wglMakeCurrent(NULL, NULL); // 사용해제
 }

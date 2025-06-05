@@ -54,26 +54,26 @@ void drawApp(float dt)
 	// ================================
 	resizeOpenGL(0, 0);
 
-	glClearColor(0, 0, 0, 1);
+	glClearColor(1, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	methodDraw(dt);
 	// ================================ line
-	if (1)
-	{
-		setLineWidth(10);
-		setRGBA(0, 0, 1, 1);
-		iPoint sp = iPointMake(10, 10);
-		iPoint ep = iPointMake(devSize.width - 10,
-			devSize.height - 10);
-		static float delta = 0.0f;
-		delta += dt;
-		iPoint mp = iPointMake(50 * sin(delta* 10), 0);
-		sp += mp;
-		ep += mp;
+	//if (1)
+	//{
+	//	setLineWidth(10);
+	//	setRGBA(1, 1, 1, 1);
+	//	iPoint sp = iPointMake(10, 10);
+	//	iPoint ep = iPointMake(devSize.width - 10,
+	//		devSize.height - 10);
+	///*	static float delta = 0.0f;
+	//	delta += dt;
+	//	iPoint mp = iPointMake(50 * sin(delta* 10), 0);
+	//	sp += mp;
+	//	ep += mp;*/
 
-		drawLine(sp, ep);
-	}
+	//	drawLine(sp, ep);
+	//}
 	// ================================ rect
 	if (0)
 	{
@@ -270,10 +270,12 @@ Texture* createImageWithRGBA(uint8* rgba, int width, int height)
 	glGenTextures(1, &texID);
 	glBindTexture(GL_TEXTURE_2D, texID);
 
+	// 안티 알리아싱
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);// GL_REPEAT
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// GL_LINEAR
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//GL_NEAREST
+	// 색상 그라데이션
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);// GL_LINEAR
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//GL_NEAREST
 
 	int pw = nextPot(width), ph = nextPot(height);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pw, ph,
@@ -375,7 +377,6 @@ void imageFilterMirror(uint8* bgra, int width, int height, int stride)
 		}
 	}
 }
-
 
 Texture* createImage(const char* szFormat, ...)
 {
