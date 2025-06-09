@@ -12,6 +12,7 @@
 #include "iImage.h"
 #include "iPopup.h"
 #include "iOpenGL.h"
+#include "iStrTex.h"
 
 #include "iFPS.h"
 #include "iSort.h"
@@ -66,11 +67,13 @@ void drawImage(Texture* tex, float x, float y,
 	int xyz, float degree, int anc, int reverse = REVERSE_NONE);
 // xyz 0: x축, 1: y축, 2: z축으로 회전
 
+float getStringSize();
 void setStringSize(float size);
+float getStringLineHeight();
+void setStringLineHeight(float height);
 void setStringRGBA(float r, float g, float b, float a);
 void getStringRGBA(float& r, float& g, float& b, float& a);
 iRect rectOfString(const char* szFormat, ...);
-void _drawString(float x, float y, const char* szFormat, ...);
 void drawString(float x, float y, int anc, const char* szFormat, ...);
 
 wchar_t* utf8_to_utf16(const char* szFormat, ...);

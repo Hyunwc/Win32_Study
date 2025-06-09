@@ -495,12 +495,27 @@ void drawImage(Texture* tex, float x, float y,
 	glDisable(GL_TEXTURE_2D);
 }
 
-float stringsize = 25.0f;
+float stringsize = 25.0f, stringLineHeight = 30.0f;
 float sr, sg, sb, sa = 1.0f;
+
+float getStringSize()
+{
+	return stringsize;
+}
 
 void setStringSize(float size)
 {
 	stringsize = size;
+}
+
+float getStringLineHeight()
+{
+	return stringLineHeight;
+}
+
+void setStringLineHeight(float height)
+{
+	stringLineHeight = height;
 }
 
 void setStringRGBA(float r, float g, float b, float a)
@@ -513,10 +528,11 @@ void getStringRGBA(float& r, float& g, float& b, float& a)
 	r = sr; g = sg; b = sb; a = sa;
 }
 
-#if 1
-iRect rectOfString(const char* szFormat, ...) { return iRect(); }
-void drawString(float x, float y, int anc, const char* szFormat, ...){}
-#else
+void drawString(float x, float y, int anc, const char* szFormat, ...)
+{
+	printf("직접 사용하지 말고, iString을 권장\n");
+}
+
 class iText
 {
 public:
@@ -534,23 +550,22 @@ public:
 
 	iRect rectOfString(const char* str)
 	{
-		// Draw string in Bitmap
-		Graphics* bk = getGraphics();
-		setGraphics(g);
-
 		float bkR, bkG, bkB, bkA;
 		float bkFR, bkFG, bkFB, bkFA;
 		getRGBA(bkR, bkG, bkB, bkA);
 		getStringRGBA(bkFR, bkFG, bkFB, bkFA);
 		
+		setStringRGBA(1, 1, 1, 1);
+#if 0
 		setRGBA(0, 0, 0, 0);
 		clear();
-		setStringRGBA(1, 1, 1, 1);
-		_drawString(0, 0, str);
-
-		setGraphics(bk);
-		getRGBA(bkR, bkG, bkB, bkA);
-		getStringRGBA(bkFR, bkFG, bkFB, bkFA);
+		iGraphics::drawString(g, 0, 0, TOP | LEFT, str);
+#else
+		iGraphics::clear(g, 0, 0, 0, 0);
+		iGraphics::drawString(g, 0, 0, str);
+#endif
+		setRGBA(bkR, bkG, bkB, bkA);
+		setStringRGBA(bkFR, bkFG, bkFB, bkFA);
 
 		Rect rt;
 		rt.X = 0;
@@ -572,7 +587,7 @@ public:
 
 	iRect rectOfString(uint8* bgra, int stride, int w, int h)
 	{
-		int left = 0; 
+		int left = w; 
 		for (int i = 0; i < w; i++)
 		{
 			bool found = false;
@@ -591,9 +606,11 @@ public:
 			if (found)
 				break;
 		}
+		if (left == w)
+			return iRectMake(0, 0, 0, 0);
 
 		// right -> left
-		int right = w;
+		int right = -1;
 		for (int i = w - 1; i > -1; i--)
 		{
 			bool found = false;
@@ -611,8 +628,11 @@ public:
 			if (found)
 				break;
 		}
+
+		if (right == -1)
+			return iRectMake(0, 0, 0, 0);
 		// top -> bottom
-		int top = 0;
+		int top = h;
 		for (int j = 0; j < h; j++)
 		{
 			bool found = false;
@@ -630,9 +650,10 @@ public:
 			if (found)
 				break;
 		}
-
+		if (top == h)
+			return iRectMake(0, 0, 0, 0);
 		// bottom -> top
-		int bottom = 0;
+		int bottom = -1;
 		for (int j = h - 1; j > -1; j--)
 		{
 			bool found = false;
@@ -650,12 +671,16 @@ public:
 			if (found)
 				break;
 		}
+		if (bottom == -1)
+			return iRectMake(0, 0, 0, 0);
+
 		return iRectMake(left, top, right - left + 1, bottom - top + 1);
 	}
 
 	Bitmap* bmp;
 	Graphics* g;
 };
+
 
 static iText* txt = NULL;
 
@@ -670,62 +695,6 @@ iRect rectOfString(const char* szFormat, ...)
 
 	return txt->rectOfString(szText);
 }
-
-void drawString(float x, float y, int anc, const char* szFormat, ...)
-{
-	char szText[512];
-	va_start_end(szFormat, szText);
-
-	iRect rt = rectOfString(szText);
-	x -= rt.origin.x;
-	y -= rt.origin.y;
-	int w = rt.size.width, h = rt.size.height;
-	switch (anc)
-	{
-	case TOP | LEFT:								break;
-	case TOP | HCENTER:		x -= w / 2;				break;
-	case TOP | RIGHT:		x -= w;					break;
-
-	case VCENTER | LEFT:    x;			y -= h / 2;	break;
-	case VCENTER | HCENTER:	x -= w / 2;	y -= h / 2;	break;
-	case VCENTER | RIGHT:	x -= w;		y -= h / 2;	break;
-	case BOTTOM | LEFT:					y -= h;		break;
-	case BOTTOM | HCENTER:	x -= w / 2;	y -= h;		break;
-	case BOTTOM | RIGHT:	x -= w;		y -= h;		break;
-	}
-
-	FontFamily  fontFamily(L"Times New Roman");
-	Font        font(&fontFamily, stringsize, FontStyleRegular, UnitPixel);
-	PointF      pointF(x, y);
-	SolidBrush  solidBrush(Color(sa * 0xFF,
-		sr * 0xFF,
-		sg * 0xFF,
-		sb * 0xFF));
-
-	wchar_t* wStr = utf8_to_utf16(szText);
-	graphics->DrawString(wStr, -1, &font, pointF, &solidBrush);
-	delete wStr;
-}
-
-void _drawString(float x, float y, const char* szFormat, ...)
-{
-	char szText[512];
-	va_start_end(szFormat, szText);
-
-	FontFamily  fontFamily(L"Times New Roman");
-	Font        font(&fontFamily, stringsize, FontStyleRegular, UnitPixel);
-	PointF      pointF(x, y);
-	SolidBrush  solidBrush(Color(sa * 0xFF,
-								 sr * 0xFF,
-								 sg * 0xFF,
-								 sb * 0xFF));
-
-	wchar_t* wStr = utf8_to_utf16(szText);
-	graphics->DrawString(wStr, -1, &font, pointF, &solidBrush);
-	delete wStr;
-}
-
-#endif
 
 wchar_t* utf8_to_utf16(const char* szFormat, ...)
 {
