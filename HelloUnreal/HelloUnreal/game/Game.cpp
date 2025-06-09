@@ -9,6 +9,7 @@
 #include "CtrlImage.h"
 #include "Oops.h"
 #include "Comp.h"
+#include "ImageText.h"
 
 ParticleSystem** _ps;
 ParticleSystem* ps;
@@ -23,6 +24,9 @@ int selectedBtn;
 
 Texture* texBg; // 배경
 Texture* texMirror;
+
+iImage* imgSt;
+iStrTex* st;
 
 void printY(const char* szFormat, ...)
 {
@@ -40,28 +44,15 @@ void printX(const char* szFormat, ...)
 	printY(szText);
 }
 
-//void testStr(char** t)
-//{
-//	printf("testStr = %s\n", *t);
-//
-//	char* s = new char[12];
-//	strcpy(s, "Hi World");
-//	delete* t;
-//	*t = s;
-//}
-
 void loadGame()
 {
-	/*char* t = new char[5];
-	strcpy(t, "hi");
-	testStr(&t);
-
-	printf("t = %s\n", t);*/
 	texBg = createImageFilter("assets/down1.png");
 	setImageFilter(imageFilterMirror);
 	texMirror = createImageFilter("assets/down1.png");
 
-#if 0
+	loadImageText();
+
+#if 1
 	loadComp();
 	return;
 #elif 0
@@ -149,9 +140,11 @@ void freeGame()
 {
 	freeImage(texBg);
 	freeImage(texMirror);
-#if 0
+
+	freeImageText();
+#if 1
 	freeComp();
-	return;
+	//return;
 #elif 0
 	freeOops();
 	return;
@@ -171,9 +164,9 @@ void freeGame()
 	//delete ps;
 	//delete _ps;
 #endif
-	for (int i = 0; i < 3; i++)
+	/*for (int i = 0; i < 3; i++)
 		delete imgBtn[i];
-	delete imgBtn;
+	delete imgBtn;*/
 }
 
 void drawGame(float dt)
@@ -184,7 +177,8 @@ void drawGame(float dt)
 	setRGBA(1, 1, 1, 1);
 	drawImage(texBg, 0, 200, BOTTOM | LEFT);
 	drawImage(texMirror, 0, 200, TOP | LEFT);
-	
+
+	drawImageText(dt);
 	/*static float delta = 0.0f;
 	delta += dt;
 	iPoint off = iPointMake(50 * sin(delta), 0);
@@ -195,9 +189,9 @@ void drawGame(float dt)
 		imgBtn[i]->paint(dt, off);
 	}*/
 
-#if 0
+#if 1
 	drawComp(dt);
-	return;
+	//return;
 #elif 0
 	drawOops(dt);
 	return;
@@ -232,9 +226,8 @@ void drawGame(float dt)
 
 void keyGame(iKeyStat stat, iPoint point)
 {
-	
-
-#if 0
+	//keyImageText(stat, point);
+#if 1
 	keyComp(stat, point);
 	return;
 #elif 0
