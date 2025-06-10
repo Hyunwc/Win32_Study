@@ -159,7 +159,9 @@ void iGraphics::drawString(Graphics* graphics, float x, float y, int anc, const 
 	case BOTTOM | RIGHT:	x -= w;		y -= h;		break;
 	}
 
-	FontFamily fontFamily(L"Times New Roman");
+	wchar_t* sn = utf8_to_utf16(getStringName());
+	FontFamily fontFamily(sn);
+	delete sn;
 	Font font(&fontFamily, getStringSize(), FontStyleRegular, UnitPixel);
 	PointF pointF(x, y);
 	float r, g, b, a;
@@ -176,7 +178,9 @@ void iGraphics::drawString(Graphics* graphics, float x, float y, const char* szF
 	char szText[512];
 	va_start_end(szFormat, szText);
 
-	FontFamily fontFamily(L"Times New Roman");
+	wchar_t* sn = utf8_to_utf16(getStringName());
+	FontFamily fontFamily(sn);
+	delete sn;
 	Font font(&fontFamily, getStringSize(), FontStyleRegular, UnitPixel);
 	PointF pointF(x, y);
 	float r, g, b, a;

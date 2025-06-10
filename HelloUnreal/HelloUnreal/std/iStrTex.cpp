@@ -142,7 +142,6 @@ Texture* iStrTex::createImage(StInfo* si, int siNum, const char* szFormat, ...)
 				}
 			}
 		}
-
 	}
 
 	Texture* tex = g->getTexture();

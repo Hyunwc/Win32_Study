@@ -10,6 +10,7 @@
 #include "Oops.h"
 #include "Comp.h"
 #include "ImageText.h"
+#include "VN.h"
 
 ParticleSystem** _ps;
 ParticleSystem* ps;
@@ -44,6 +45,10 @@ void printX(const char* szFormat, ...)
 	printY(szText);
 }
 
+static METHOD_VOID methodLoad, methodFree;
+static METHOD_FLOAT methodDraw;
+static METHOD_KEY methodKey;
+
 void loadGame()
 {
 	texBg = createImageFilter("assets/down1.png");
@@ -52,38 +57,32 @@ void loadGame()
 
 	loadImageText();
 
-#if 1
-	loadComp();
-	return;
-#elif 0
-	loadOops();
-	return;
-#elif 0
-	loadAnimating();
-	return;
-#elif 0
-	loadLotto();
-#elif 0
-	loadTripple();
-#elif 0
-	loadAirShootng();
-#elif 0
-	loadMemory();
-#elif 0
-	/*_ps = new ParticleSystem * [7];
-	for (int i = 0; i < 7; i++)
-	{
-		char path[32];
-		sprintf(path, "test%d.ptc", i);
-		_ps[i] = new ParticleSystem(path);
-	}
-	ps = _ps[psIndex = 0];*/
-	ps = new ParticleSystem();
-	//ps = new ParticleSystem();
-	//ps->save("test6.ptc");
-	//
-	//// 파일 이름으로 Load
-	//ps = new ParticleSystem("test.ptc");
+	METHOD_VOID mLoad[] = {
+		loadVN, loadComp, loadOops, loadAnimating,
+		loadLotto, loadTripple, loadAirShootng, loadMemory
+	};
+
+	METHOD_VOID mFree[] = {
+		freeVN, freeComp, freeOops, freeAnimating,
+		freeLotto, freeTripple, freeAirShootng, freeMemory
+	};
+
+	METHOD_FLOAT mDraw[] = {
+		drawVN, drawComp, drawOops, drawAnimating,
+		drawLotto, drawTripple, drawAirShootng, drawMemory
+	};
+
+	METHOD_KEY mKey[] = {
+		keyVN, keyComp, keyOops, keyAnimating,
+		keyLotto, keyTripple, keyAirShootng, keyMemory
+	};
+
+	int runIndex = 0;
+	mLoad[runIndex]();
+	methodFree = mFree[runIndex];
+	methodDraw = mDraw[runIndex];
+	methodKey = mKey[runIndex];
+#if 0
 	
 #endif
 	struct BtnInfo
@@ -143,22 +142,8 @@ void freeGame()
 
 	freeImageText();
 #if 1
-	freeComp();
-	//return;
-#elif 0
-	freeOops();
+	methodFree();
 	return;
-#elif 0
-	freeAnimating();
-	return;
-#elif 0
-	freeLotto();
-#elif 0
-	freeTripple();
-#elif 0
-	freeAirShootng();
-#elif 0
-	freeMemory();
 #elif 0
 
 	//delete ps;
@@ -190,27 +175,8 @@ void drawGame(float dt)
 	}*/
 
 #if 1
-	drawComp(dt);
-	//return;
-#elif 0
-	drawOops(dt);
+	methodDraw(dt);
 	return;
-#elif 0
-	drawAnimating(dt);
-	return;
-#elif 0
-	drawLotto(dt);
-	return;
-#elif 0
-	drawTripple(dt);
-	return;
-#elif 0
-	drawAirShootng(dt);
-	return;
-#elif 0
-	drawMemory(dt);
-	return;
-#elif 0
 	//ps->paint(dt, iPointMake(DEV_WIDTH/2, DEV_HEIGHT /2));
 	//ps->paint(dt, iPointMake(psPos.x, psPos.y));
 
@@ -228,28 +194,8 @@ void keyGame(iKeyStat stat, iPoint point)
 {
 	//keyImageText(stat, point);
 #if 1
-	keyComp(stat, point);
+	methodKey(stat, point);
 	return;
-#elif 0
-	keyOops(stat, point);
-	return;
-#elif 0
-	keyAnimating(stat, point);
-	return;
-#elif 0
-	keyLotto(stat, point);
-	return;
-#elif 0
-	keyTripple(stat, point);
-	return;
-#elif 0
-	keyAirShootng(stat, point);
-	return;
-#elif 0
-	keyMemory(stat, point);
-	return;
-#elif 0
-	//ps->move(stat, point);
 #endif
 	
 	if (stat == iKeyStatBegan)

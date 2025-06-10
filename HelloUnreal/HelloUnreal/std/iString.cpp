@@ -173,11 +173,72 @@ char** iString::split(int& lineNum, const char* s, char d)
 	return line;
 }
 
+#include "iStd.h"
+char** iString::splitWidth(int& lineNum, const char* s, int width)
+{
+	// 
+	char t[512];
+	int off = 0; 
+	iArray* array = new iArray();
+
+	int i, j;
+	// s = abcdefgh
+	// t = fgh
+	for (i = 0, j = 0; s[i]; j++)
+	{
+		int cpy = isUTF8(&s[i]) ? 3 : 1;
+
+		/*t[j] = s[i];
+		t[j + 1] = 0;*/
+		memcpy(&t[j], &s[i], sizeof(char) * cpy);
+		t[j + cpy] = 0;
+
+		if (rectOfString(t).size.width > width)
+		{
+			// off ~ i - 1
+			int len = i - off;
+			char* str = new char[len + 1];
+			memcpy(str, &s[off], sizeof(char)* len);
+			str[len] = 0;
+
+			off = i;
+			j = -1; 
+
+			array->add(str);
+		}
+
+		i += cpy;
+	}
+
+	int len = i - off;
+	char* str = new char[len + 1];
+	memcpy(str, &s[off], sizeof(char) * len);
+	str[len] = 0;
+
+	array->add(str);
+
+	char** line = new char* [array->count];
+	for (int i = 0; i < array->count; i++)
+		line[i] = (char*)array->at(i);
+
+	lineNum = array->count;
+	delete array;
+
+	return line;
+}
+
 void iString::free(char** line, int lineNum)
 {
 	for (int i = 0; i < lineNum; i++)
 		delete line[i];
 	delete line;
+}
+
+bool iString::isUTF8(const char* str)
+{
+	return (str[0] & 0xF0) == 0xE0 &&
+		   (str[1] & 0xC0) == 0x80 &&
+		   (str[2] & 0xC0) == 0x80; 
 }
 
 bool iString::trim()
@@ -243,4 +304,20 @@ void iString::copy(char a[], const char b[])
 	}
 
 	a[idx] = '\0';
+}
+
+char* iString::copy()
+{
+	int len = strlen(s);
+	char* t = new char[len + 1];
+	strcpy(t, s);
+	return t;
+}
+
+char* iString::copy(const char* s)
+{
+	int len = strlen(s);
+	char* t = new char[len + 1];
+	strcpy(t, s);
+	return t;
 }

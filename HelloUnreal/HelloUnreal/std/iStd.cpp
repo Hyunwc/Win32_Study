@@ -189,8 +189,11 @@ void drawRect(iRect rt)
 
 void fillRect(float x, float y, float width, float height)
 {
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
 	float rt[] = {
-		x, y,             _r, _g, _b, _a,   x + width, y,              _r, _g, _b, _a,
+		x, y,             _r, _g, _b, _a,    x + width, y,             _r, _g, _b, _a,
 		x, y + height,    _r, _g, _b, _a,    x + width, y + height,    _r, _g, _b, _a,
 	};
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -495,8 +498,25 @@ void drawImage(Texture* tex, float x, float y,
 	glDisable(GL_TEXTURE_2D);
 }
 
+char* stringName = NULL;
 float stringsize = 25.0f, stringLineHeight = 30.0f;
-float sr, sg, sb, sa = 1.0f;
+float sr = 1.0f, sg = 1.0f, sb = 1.0f, sa = 1.0f;
+
+const char* getStringName()
+{
+	return stringName;
+}
+
+void setStringName(const char* name)
+{
+	if (stringName)
+	{
+		if (strcmp(stringName, name) == 0)
+			return;
+		delete stringName;
+	}
+	stringName = iString::copy(name);
+}
 
 float getStringSize()
 {
