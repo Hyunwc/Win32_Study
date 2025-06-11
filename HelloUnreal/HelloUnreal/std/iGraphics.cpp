@@ -136,6 +136,44 @@ void iGraphics::drawString(float x, float y, int anc, const char* szFormat, ...)
 	drawString(g, x, y, anc, szText);
 }
 
+void checkFontFamily(const char* stringName, FontFamily* ff, FontStyle& fs)
+{
+	if (strncmp(stringName, "ass", 3))
+	{
+		wchar_t* sn = utf8_to_utf16(getStringName());
+		FontFamily fontFamily(sn);
+		delete sn;
+		memcpy(ff, &fontFamily, sizeof(FontFamily));
+		fs = FontStyleRegular;
+	}
+	else
+	{
+		PrivateFontCollection* pfc = new PrivateFontCollection();
+		wchar_t* path = utf8_to_utf16(getStringName());
+		pfc->AddFontFile(path);
+		delete path;
+
+		int count = pfc->GetFamilyCount();
+		int found;
+		pfc->GetFamilies(count, ff, &found); // ff
+
+		for (int i = 0; i < found; i++)
+		{
+			if (ff->IsStyleAvailable(FontStyleRegular))
+			{
+				fs = FontStyleRegular;
+				break;
+			}
+			else if (ff->IsStyleAvailable(FontStyleBold))
+			{
+				fs = FontStyleBold;
+				break;
+			}
+		}
+		delete pfc;
+	}
+}
+
 void iGraphics::drawString(Graphics* graphics, float x, float y, int anc, const char* szFormat, ...)
 {
 	char szText[512];
@@ -159,15 +197,22 @@ void iGraphics::drawString(Graphics* graphics, float x, float y, int anc, const 
 	case BOTTOM | RIGHT:	x -= w;		y -= h;		break;
 	}
 
+#if 0
 	wchar_t* sn = utf8_to_utf16(getStringName());
 	FontFamily fontFamily(sn);
 	delete sn;
 	Font font(&fontFamily, getStringSize(), FontStyleRegular, UnitPixel);
+#else
+	FontFamily ff;
+	FontStyle fs;
+	checkFontFamily(getStringName(), &ff, fs);
+
+	Font font(&ff, getStringSize(), fs, UnitPixel);
+#endif
 	PointF pointF(x, y);
 	float r, g, b, a;
 	getStringRGBA(r, g, b, a);
 	SolidBrush solidBrush(Color(a * 0xFF, r * 0xFF, g * 0xFF, b * 0xFF));
-
 	wchar_t* wStr = utf8_to_utf16(szText);
 	graphics->DrawString(wStr, -1, &font, pointF, &solidBrush);
 	delete wStr;
@@ -177,11 +222,17 @@ void iGraphics::drawString(Graphics* graphics, float x, float y, const char* szF
 {
 	char szText[512];
 	va_start_end(szFormat, szText);
-
+#if 0
 	wchar_t* sn = utf8_to_utf16(getStringName());
 	FontFamily fontFamily(sn);
 	delete sn;
 	Font font(&fontFamily, getStringSize(), FontStyleRegular, UnitPixel);
+#else
+	FontFamily ff;
+	FontStyle fs;
+	checkFontFamily(getStringName(), &ff, fs);
+	Font font(&ff, getStringSize(), fs, UnitPixel);
+#endif
 	PointF pointF(x, y);
 	float r, g, b, a;
 	getStringRGBA(r, g, b, a);

@@ -2,7 +2,9 @@
 
 ScriptMgt* sm;
 
-void methodSM(char** line, int lineNum, int pageIndex, int pageNum);
+void methodSM(char** line, int lineNum,
+	int pageIndex, int pageNum,
+	const char* stringName, float stringSize);
 
 // whosay s[whoIndex] -> pageIndex / pageNum
 // index total
@@ -15,7 +17,11 @@ void methodSM(char** line, int lineNum, int pageIndex, int pageNum);
 void loadVN()
 {
 	sm = new ScriptMgt(methodSM);
-	sm->set(ws, 10, 150, 3);
+	int lineWidth = 150;
+	int linesOfPage = 3;
+	sm->set(ws, 10, 
+		"assets/CRRegular.ttf", 25,
+		lineWidth, linesOfPage);
 }
 
 void freeVN()
@@ -25,7 +31,9 @@ void freeVN()
 
 iStrTex** stVN = NULL;
 
-void methodSM(char** line, int lineNum, int pageIndex, int pageNum)
+void methodSM(char** line, int lineNum,
+	int pageIndex, int pageNum,
+	const char* stringName, float stringSize)
 {
 	setRGBA(1, 0, 0, 1);
 	float x = 0, y = 0;
@@ -38,8 +46,8 @@ void methodSM(char** line, int lineNum, int pageIndex, int pageNum)
 		for (int i = 0; i < 4; i++)
 			stVN[i] = new iStrTex(NULL);
 	}
-
-	setStringSize(30);
+	setStringName(stringName);
+	setStringSize(stringSize);
 	setStringRGBA(1, 1, 1, 1);
 
 	// 글자 출력
@@ -113,19 +121,35 @@ void ScriptMgt::clean()
 	pageStr = NULL;
 }
 
-void ScriptMgt::set(WhoSay* ws, int wsNum, int lw, int lop)
+void ScriptMgt::set(WhoSay* ws, int wsNum, 
+	const char* sn, float ss, 
+	int lw, int lop, float aDt)
 {
 	this->ws = ws;
 	this->wsNum = wsNum;
 	wsIndex = 0;
+	stringName = iString::copy(sn);
+	stringSize = ss;
 	lineWidth = lw;
 	linesOfPage = lop;
+	aniStr = new char* [lop];
+	for (int i = 0; i < lop; i++)
+		aniStr[i] = new char[512];
+	_aniDt = aDt;
+	aniDt = 0.0f;
+	aniIndex = 0;
 	load(ws[0].say);
 }
 
 void ScriptMgt::load(const char* say)
 {
+	char* bkSN = iString::copy(getStringName());
+	float bkSS = getStringSize();
+	setStringName(stringName);
+	setStringSize(stringSize);
+
 	char t[100];
+
 	iArray* array = new iArray();
 
 	int lineNum;
@@ -167,6 +191,9 @@ void ScriptMgt::load(const char* say)
 	for (int i = 0; i < array->count; i++)
 		pageStr[i / linesOfPage][i % linesOfPage] = (char*)array->at(i);
 	delete array;
+
+	setStringName(bkSN);
+	setStringSize(bkSS);
 }
 
 bool ScriptMgt::nextWs()
@@ -183,16 +210,29 @@ bool ScriptMgt::nextWs()
 bool ScriptMgt::nextPage()
 {
 	pageIndex++;
-	if (pageIndex < pageNum)
+	if (aniIndex < aniTotal)
 	{
-
+		// skip
+		aniIndex = aniTotal;
 	}
-	else // if(pageIndex == pageNum)
+	else
 	{
-		return nextWs();
+		// next page
+		aniIndex = 0;
+		aniDt = 0.0f;
+
+		if (pageIndex < pageNum)
+		{
+		}
+		else // if(pageIndex == pageNum)
+		{
+			return nextWs();
+		}
 	}
 	return true;
 }
+
+void copyLine(char** src, int srcNum, char** dst, int& dstNum, int len);
 
 void ScriptMgt::paint(float dt)
 {
@@ -200,16 +240,67 @@ void ScriptMgt::paint(float dt)
 		return;
 
 	char** s = pageStr[pageIndex];
-	int lop = linesOfPage;
+	int sNum = linesOfPage;
 	for (int i = 0; i < linesOfPage; i++)
 	{
 		if (s[i] == NULL)
 		{
-			lop = i;
+			sNum = i;
 			break;
 		}
 	}
 
-	method(s, lop, pageIndex, pageNum);
+	int total = 0;
+	for (int i = 0; i < sNum; i++)
+	{
+		char* t = s[i];
+		for (int j = 0; t[j];)
+		{
+			// 총 글자수 -> 한글은 한자에 3바이트기 때문
+			total++;
+
+			j += (iString::isUTF8(&t[j]) ? 3 : 1);
+		}
+	}
+
+	aniTotal = total;
+
+	aniDt += dt;
+	while (aniDt >= _aniDt)
+	{
+		aniDt -= _aniDt;
+		aniIndex++;
+		if (aniIndex > aniTotal)
+			aniIndex = aniTotal;
+	}
+
+	// aniTotal, aniIndex 고려해서 aniStr입력, aniStrNum
+	int aniNum;
+	for (int i = 0; i < linesOfPage; i++)
+		memset(aniStr[i], 0x00, sizeof(char) * 512);
+	copyLine(s, sNum, aniStr, aniNum, aniIndex);
+	method(aniStr, aniNum, pageIndex, pageNum, stringName, stringSize);
 }
 
+void copyLine(char** src, int srcNum, char** dst, int& dstNum, int len)
+{
+	int m = 0, n = 0;
+	for (int i = 0; i < len; i++) // 글자 수
+	{
+		int cpy = iString::isUTF8(&src[m][n]) ? 3 : 1;
+		memcpy(&dst[m][n], &src[m][n], cpy);
+		//dst[m][n + cpy] = 0; // 문자열의 끝
+		n += cpy;
+
+		// 줄바꿈
+		if (src[m][n] == 0)
+		{
+			m++;
+			n = 0;
+		}
+	}
+	// 라인수
+	dstNum = m + 1;
+	if (dstNum > srcNum)
+		dstNum = srcNum;
+}

@@ -57,6 +57,18 @@ void resizeOpenGL(int width, int height)
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+
+	//glPushMatrix(); // backup
+	////float m[4][4]; // == m[16]
+	////glGetFloatv(GL_MODELVIEW_MATRIX, &m[0][0]); // backup
+	//glTranslatef(200, 0, 0);
+
+	//float n[4][4]; // == m[16]
+	//glGetFloatv(GL_MODELVIEW_MATRIX, &n[0][0]);
+
+	//glPopMatrix(); // restore
+	////glLoadMatrixf(&m[0][0]); // restore
 	// ~ 해상도 지정
 }
 

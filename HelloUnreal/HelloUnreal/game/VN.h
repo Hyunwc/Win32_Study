@@ -13,14 +13,18 @@ struct WhoSay
 	const char* say; // 내용
 };
 
-typedef void (*MethodSM)(char** line, int lineNum, int pageIndex, int pageNum);
+typedef void (*MethodSM)(char** line, int lineNum,
+	int pageIndex, int pageNum,
+	const char* stringName, float stringSize);
 
 struct ScriptMgt
 {
 	ScriptMgt(MethodSM method);
 	virtual ~ScriptMgt();
 	
-	void set(WhoSay* ws, int wsNum, int lw, int lop);
+	void set(WhoSay* ws, int wsNum,
+		const char* stringName, float stringSize,
+		int lineWidth, int linesOfPage, float aniDt = 0.2f);
 	void clean();
 	void load(const char* say);
 	void paint(float dt);
@@ -31,6 +35,8 @@ public:
 	MethodSM method;
 	// set
 	WhoSay* ws;
+	const char* stringName;
+	float stringSize;
 	int wsNum, wsIndex;
 	int lineWidth, linesOfPage;
 
@@ -38,6 +44,10 @@ public:
 	char*** pageStr;
 	// 페이지 인덱스(현재 페이지), 총 페이지
 	int pageIndex, pageNum;
+	// animation
+	char** aniStr;
+	float aniDt, _aniDt;
+	int aniIndex, aniTotal;
 };
 
 extern WhoSay ws[10];

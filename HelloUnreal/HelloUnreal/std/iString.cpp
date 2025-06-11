@@ -176,7 +176,6 @@ char** iString::split(int& lineNum, const char* s, char d)
 #include "iStd.h"
 char** iString::splitWidth(int& lineNum, const char* s, int width)
 {
-	// 
 	char t[512];
 	int off = 0; 
 	iArray* array = new iArray();
@@ -184,7 +183,7 @@ char** iString::splitWidth(int& lineNum, const char* s, int width)
 	int i, j;
 	// s = abcdefgh
 	// t = fgh
-	for (i = 0, j = 0; s[i]; j++)
+	for (i = 0, j = 0; s[i];)
 	{
 		int cpy = isUTF8(&s[i]) ? 3 : 1;
 
@@ -202,12 +201,14 @@ char** iString::splitWidth(int& lineNum, const char* s, int width)
 			str[len] = 0;
 
 			off = i;
-			j = -1; 
+			i -= cpy;
+			j = -cpy; 
 
 			array->add(str);
 		}
 
-		i += cpy;
+		i += cpy; // i++
+		j += cpy; // j++
 	}
 
 	int len = i - off;
