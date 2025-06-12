@@ -138,8 +138,8 @@ iFBO::iFBO(int width, int height)
 
 	tex = createImage(width, height);
 
-	glGenFramebuffers(1, &fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glGenFramebuffers(1, &fbo); // 프레임버퍼 생성
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo); // 바인딩
 
 	GLenum fboBuffs[1] = { GL_COLOR_ATTACHMENT0 };
 	//glDrawBuffer(fboBuffs[0]);
@@ -166,8 +166,6 @@ void iFBO::bind()
 {
 	bind(tex);
 }
-
-
 
 void iFBO::bind(Texture* tex)
 {

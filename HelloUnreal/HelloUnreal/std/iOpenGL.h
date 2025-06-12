@@ -13,6 +13,8 @@ void resizeOpenGL(int width, int height);
 void swapBuffer();
 void setMakeCurrent(bool enable);
 
+
+// 프레임버퍼 
 class iFBO
 {
 public:
