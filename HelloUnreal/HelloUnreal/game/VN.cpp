@@ -13,6 +13,28 @@ void methodSM(char** line, int lineNum,
 // index < num -> index = total
 // index == num -> (page++ pageNum -> whoIndex)
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtx/string_cast.hpp>
+
+void testGLM()
+{
+	glm::vec4 v(1, 0, 0, 0); // x, y, z, w
+
+	glm::mat4 m(1.0);
+	float a[4][4];
+	memcpy(&a[0][0], &m, sizeof(float) * 16);
+
+	glm::rotate(m, glm::radians(45.0f), glm::vec3(0, 0, 1));
+	memcpy(&a[0][0], &m, sizeof(float) * 16);
+
+	glm::vec4 result = m * v;
+	float b[4];
+	memcpy(b, &result, sizeof(float) * 4);
+
+	printf("");
+}
 
 void loadVN()
 {
@@ -22,6 +44,15 @@ void loadVN()
 	sm->set(ws, 10, 
 		"assets/CRRegular.ttf", 25,
 		lineWidth, linesOfPage);
+
+	//float m[4][4];
+	//glGetFloatv(GL_PROJECTION_MATRIX, &m[0][0]);
+	////glm::mat4 projection = glm::mat4(1.0f);
+	//glm::mat4 projection = glm::ortho(0, tex->width, tex->height,
+	//	0, -1024, 1024);
+	//std::string ss = glm::to_string(projection);
+	//const char* s = ss.c_str();
+	//glLoadMatrixf((float*)&projection);
 }
 
 void freeVN()

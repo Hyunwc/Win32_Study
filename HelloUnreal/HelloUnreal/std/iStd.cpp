@@ -54,70 +54,22 @@ void drawApp(float dt)
 	// ================================
 	resizeOpenGL(0, 0);
 
-	glClearColor(1, 0, 0, 1);
+	// back buffer(bmp::graphics)
+	fbo->bind();
+	glClearColor(0, 0, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT);
+	methodDraw(dt);
+	fbo->unbind();
+
+	// front buffer(draw bmp)
+	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	methodDraw(dt);
-	// ================================ line
-	//if (1)
-	//{
-	//	setLineWidth(10);
-	//	setRGBA(1, 1, 1, 1);
-	//	iPoint sp = iPointMake(10, 10);
-	//	iPoint ep = iPointMake(devSize.width - 10,
-	//		devSize.height - 10);
-	///*	static float delta = 0.0f;
-	//	delta += dt;
-	//	iPoint mp = iPointMake(50 * sin(delta* 10), 0);
-	//	sp += mp;
-	//	ep += mp;*/
-
-	//	drawLine(sp, ep);
-	//}
-	// ================================ rect
-	if (0)
-	{
-		setRGBA(1, 1, 1, 1);
-		fillRect(0, 0, devSize.width, devSize.height);
-
-		setRGBA(1, 0, 1, 1);
-		fillRect(0, 0, devSize.width - 100, devSize.height - 100);
-		setRGBA(1, 1, 1, 1);
-	}
-	// ================================ Texture
-	if (0)
-	{
-		setRGBA(1, 1, 1, 1);
-		static Texture* tex = createImage("assets/down1.png");
-
-		static float delta = 0.0f;
-		delta += dt;
-		
-		float degree = 360 * fabsf(sin(delta * 3));
-		//drawImage(tex, 0, 0, TOP | LEFT);
-		drawImage(tex, 0, 0, TOP | LEFT);
-		
-	}
-	// ================================ triangle
-	if (0)
-	{
-		float tri[] = {
-		0.0f, 0.9f,		1, 0, 0, 1,
-		-0.9f, -0.9f,	0, 1, 0, 1,
-		0.9f, -0.9f,	0, 0, 1, 1,
-		};
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_COLOR_ARRAY);
-		glVertexPointer(2, GL_FLOAT, sizeof(float) * 6, &tri[0]);
-		glColorPointer(4, GL_FLOAT, sizeof(float) * 6, &tri[2]);
-
-		uint8 indices[] = { 0, 1, 2 };
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, indices);
-
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_COLOR_ARRAY);
-	}
+	Texture* t = fbo->tex;
+	float r = viewport.size.width / devSize.width;
+	drawImage(t, viewport.origin.x, viewport.origin.y,
+		0, 0, t->width, t->height, r, r, 2, 0,
+		TOP | LEFT, REVERSE_HEIGHT);
 	
 	// ================================
 	swapBuffer();
@@ -143,6 +95,19 @@ void clear()
 {
 	glClearColor(_r, _g, _b, _a);
 	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void setClip(float x, float y, float width, float height)
+{
+	if (x == 0 && y == 0 && width == 0 && height == 0)
+	{
+		glDisable(GL_SCISSOR_TEST);
+	}
+	else
+	{
+		glEnable(GL_SCISSOR_TEST);
+		glScissor(x, devSize.height - y, width, height);
+	}
 }
 
 float lineWidth = 1;

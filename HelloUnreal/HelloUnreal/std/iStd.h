@@ -34,6 +34,7 @@ void setRGBA(float r, float g, float b, float a);
 void getRGBA(float& r, float& g, float& b, float& a);
 
 void clear();
+void setClip(float x, float y, float width, float height);
 
 void setLineWidth(float width);
 
