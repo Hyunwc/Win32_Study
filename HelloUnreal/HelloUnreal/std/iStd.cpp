@@ -66,7 +66,7 @@ void drawApp(float dt)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	Texture* t = fbo->tex;
-	float r = viewport.size.width / devSize.width;
+	float r = viewport.size.width / t->width;
 	drawImage(t, viewport.origin.x, viewport.origin.y,
 		0, 0, t->width, t->height, r, r, 2, 0,
 		TOP | LEFT, REVERSE_HEIGHT);
@@ -363,6 +363,61 @@ Texture* createImage(const char* szFormat, ...)
 	delete rgba;
 
 	return tex;
+}
+
+Texture** createImage(int wNum, int hNum, const char* szFormat, ...)
+{
+	char szText[512];
+	va_start_end(szFormat, szText);
+
+	wchar_t* path = utf8_to_utf16(szText);
+	Bitmap* bmp = Bitmap::FromFile(path);
+	delete path;
+	int width, height;
+	uint8* rgba = bmp2rgba(bmp, width, height);
+	delete bmp;
+	int potWidth = nextPot(width);
+
+	int num = wNum * hNum;
+	Texture** texs = new Texture * [num];
+	int w = width / wNum;
+	int h = height / hNum;
+	int pw = nextPot(w), ph = nextPot(h);
+	// 이미지 한장짜리 버퍼의 크기
+	uint8* tmp = new uint8[pw * ph * 4];
+	memset(tmp, 0x00, sizeof(uint8) * pw * ph * 4);
+	for (int j = 0; j < hNum; j++)
+	{
+		for (int i = 0; i < wNum; i++)
+		{
+			// tmp << rgba(i, j)
+			for (int n = 0; n < h; n++)
+			{
+				memcpy(&tmp[pw * 4 * n],
+					   &rgba[potWidth * 4 * (h * j + n) +
+							w * 4 * i], // 한줄의 높이
+					   pw * 4);
+			}
+// 배경 없애기
+#if 0
+			for (int q = 0; q < h; q++)
+			{
+				for (int p = 0; p < w; p++)
+				{
+					uint8* c = &tmp[pw * 4 * q + 4 * p];
+					if (c[0] == 0xFF &&
+						c[1] == 0xFF &&
+						c[2] == 0xFF)
+						c[3] = 0;
+				}
+			}
+#endif
+			texs[wNum * j + i] = createImageWithRGBA(tmp, w, h);
+		}
+	}
+
+	delete rgba;
+	return texs;
 }
 
 void freeImage(Texture* tex)

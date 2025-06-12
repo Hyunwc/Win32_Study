@@ -167,10 +167,7 @@ void iFBO::bind()
 	bind(tex);
 }
 
-//#define GLM_ENABLE_
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
-#include <glm/gtx/string_cast.hpp>
+
 
 void iFBO::bind(Texture* tex)
 {
@@ -186,14 +183,7 @@ void iFBO::bind(Texture* tex)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, tex->width, tex->height, 0, -1024, 1024);
-	float m[4][4];
-	glGetFloatv(GL_PROJECTION_MATRIX, &m[0][0]);
-	//glm::mat4 projection = glm::mat4(1.0f);
-	glm::mat4 projection = glm::ortho(0, tex->width, tex->height,
-		0, -1024, 1024);
-	std::string ss = glm::to_string(projection);
-	const char* s = ss.c_str();
-	glLoadMatrixf((float*)&projection);
+	
 }
 
 // 원래대로 다시 설정

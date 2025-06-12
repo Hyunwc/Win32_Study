@@ -60,6 +60,7 @@ void imageFilterGrey(uint8* bgra, int width, int height, int stride);
 void imageFilterMirror(uint8* bgra, int width, int height, int stride);
 
 Texture* createImage(const char* szFormat, ...);
+Texture** createImage(int wNum, int hNum, const char* szFormat, ...);
 void freeImage(Texture* tex);
 void drawImage(Texture* tex, float x, float y, int anc);
 void drawImage(Texture* tex, float x, float y,

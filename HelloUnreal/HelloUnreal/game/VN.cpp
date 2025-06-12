@@ -6,6 +6,7 @@ void methodSM(char** line, int lineNum,
 	int pageIndex, int pageNum,
 	const char* stringName, float stringSize);
 
+Texture** texWho;
 // whosay s[whoIndex] -> pageIndex / pageNum
 // index total
 
@@ -13,51 +14,42 @@ void methodSM(char** line, int lineNum,
 // index < num -> index = total
 // index == num -> (page++ pageNum -> whoIndex)
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
-#include <glm/gtx/string_cast.hpp>
-
-void testGLM()
-{
-	glm::vec4 v(1, 0, 0, 0); // x, y, z, w
-
-	glm::mat4 m(1.0);
-	float a[4][4];
-	memcpy(&a[0][0], &m, sizeof(float) * 16);
-
-	glm::rotate(m, glm::radians(45.0f), glm::vec3(0, 0, 1));
-	memcpy(&a[0][0], &m, sizeof(float) * 16);
-
-	glm::vec4 result = m * v;
-	float b[4];
-	memcpy(b, &result, sizeof(float) * 4);
-
-	printf("");
-}
-
 void loadVN()
 {
+	WhoSay* whoSay = ws;
+	int whoSayNum = 10;
+	// File I/O
+#if 0
+	ScriptMgt::save("assets/ws.scr", ws, 10);
+#elif 0
+	int whoSayNum;
+	WhoSay* whoSay = ScriptMgt::call("assets/ws.scr", whoSayNum);
+#endif
+
 	sm = new ScriptMgt(methodSM);
 	int lineWidth = 150;
 	int linesOfPage = 3;
-	sm->set(ws, 10, 
+	sm->set(whoSay, whoSayNum,
 		"assets/CRRegular.ttf", 25,
-		lineWidth, linesOfPage);
+		lineWidth, linesOfPage, 0.1f);
 
-	//float m[4][4];
-	//glGetFloatv(GL_PROJECTION_MATRIX, &m[0][0]);
-	////glm::mat4 projection = glm::mat4(1.0f);
-	//glm::mat4 projection = glm::ortho(0, tex->width, tex->height,
-	//	0, -1024, 1024);
-	//std::string ss = glm::to_string(projection);
-	//const char* s = ss.c_str();
-	//glLoadMatrixf((float*)&projection);
+	texWho = createImage(5, 2, "assets/who.jpg");
+	for (int i = 0; i < 10; i++)
+	{
+		Texture* t = texWho[i];
+		t->width /= 8;
+		t->height /= 8;
+		t->potWidth /= 8;
+		t->potHeight /= 8;
+	}
 }
 
 void freeVN()
 {
 	delete sm;
+	for (int i = 0; i < 10; i++)
+		freeImage(texWho[i]);
+	delete texWho;
 }
 
 iStrTex** stVN = NULL;
@@ -96,6 +88,9 @@ void drawVN(float dt)
 	clear();
 
 	sm->paint(dt);
+
+	for (int i = 0; i < 10; i++)
+		drawImage(texWho[i], 10 + 80 * (i%5), 20 + 150 * (i/5), TOP | LEFT );
 }
 
 void keyVN(iKeyStat stat, iPoint point)
@@ -132,6 +127,56 @@ ScriptMgt::ScriptMgt(MethodSM method)
 ScriptMgt::~ScriptMgt()
 {
 	clean();
+}
+
+void ScriptMgt::save(const char* path, WhoSay* ws, int wsNum)
+{
+	FILE* pf = fopen(path, "wb");
+
+	fwrite(&wsNum, sizeof(int), 1, pf);
+	for (int i = 0; i < wsNum; i++)
+	{
+		const char* t = ws[i].who;
+		int len = strlen(t);
+		fwrite(&len, sizeof(int), 1, pf);
+		fwrite(t, sizeof(char), len, pf);
+
+		t = ws[i].say; // who가 쓸려고하는 내용
+		len = strlen(t);
+		fwrite(&len, sizeof(int), 1, pf);
+		fwrite(t, sizeof(char), len, pf);
+	}
+
+	fclose(pf);
+}
+
+WhoSay* ScriptMgt::call(const char* path, int& wsNum)
+{
+	FILE* pf = fopen(path, "rb");
+
+	int num;
+	fread(&num, sizeof(int), 1, pf);
+	WhoSay* ws = new WhoSay[num];
+	for (int i = 0; i < num; i++)
+	{
+		int len;
+		fread(&len, sizeof(int), 1, pf);
+		char* t = new char[len + 1];
+		fread(t, sizeof(char), len, pf);
+		t[len] = 0;
+		ws[i].who = t;
+
+		fread(&len, sizeof(int), 1, pf);
+		t = new char[len + 1];
+		fread(t, sizeof(char), len, pf);
+		t[len] = 0;
+		ws[i].say = t;
+	}
+
+	fclose(pf);
+
+	wsNum = num;
+	return ws;
 }
 
 void ScriptMgt::clean()
