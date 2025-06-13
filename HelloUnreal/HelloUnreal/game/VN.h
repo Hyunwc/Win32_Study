@@ -55,27 +55,24 @@ public:
 
 extern WhoSay ws[10];
 
-#if 0
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
-#include <glm/gtx/string_cast.hpp>
-
-void testGLM()
+struct DicWho
 {
-	glm::vec4 v(1, 0, 0, 0); // x, y, z, w
+	Texture* tex;
+	char* key;
+};
 
-	glm::mat4 m(1.0);
-	float a[4][4];
-	memcpy(&a[0][0], &m, sizeof(float) * 16);
+void loadDicWho();
+void freeDicWho();
 
-	glm::rotate(m, glm::radians(45.0f), glm::vec3(0, 0, 1));
-	memcpy(&a[0][0], &m, sizeof(float) * 16);
+Texture* getDicWho(const char* key);
 
-	glm::vec4 result = m * v;
-	float b[4];
-	memcpy(b, &result, sizeof(float) * 4);
+// ==================
+// PopTest
+// ==================
+extern iPopup* popTest;
 
-	printf("");
-}
-#endif
+void createPopTest();
+void freePopTest();
+void showPopTest(bool show);
+void drawPopTest(float dt);
+bool keyPopTest(iKeyStat stat, iPoint point);

@@ -19,13 +19,13 @@ void loadApp(HWND hWnd, METHOD_VOID load, METHOD_VOID free,
 	GdiplusStartupInput gdiplusStartupInput;
 	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
-	loadOpenGL(hWnd);
-
 	// back buffer
 	keydown = keydown_none;
 	keystat = keydown_none;
 	devSize = iSizeMake(DEV_WIDTH, DEV_HEIGHT);
 	viewport = iRectMake(0, 0, 1, 1);
+
+	loadOpenGL(hWnd);
 
 	_r = 1.0f;
 	_g = 1.0f;
@@ -54,22 +54,32 @@ void drawApp(float dt)
 	// ================================
 	resizeOpenGL(0, 0);
 
+#if 0
+	glClearColor(0, 0, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT);
+	methodDraw(dt);
+#else 
 	// back buffer(bmp::graphics)
 	fbo->bind();
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
 	methodDraw(dt);
 	fbo->unbind();
 
 	// front buffer(draw bmp)
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // pre-multiplied alpha
 
 	Texture* t = fbo->tex;
-	float r = viewport.size.width / t->width;
-	drawImage(t, viewport.origin.x, viewport.origin.y,
-		0, 0, t->width, t->height, r, r, 2, 0,
-		TOP | LEFT, REVERSE_HEIGHT);
+	// 뷰포트
+	drawImage(t, 0, 0, 0, 0, t->width, t->height, 1, 1, 2, 0, TOP | LEFT, REVERSE_HEIGHT);
+	// 미니맵
+	/*drawImage(t, devSize.width - 10, devSize.height, 0, 0, t->width, t->height,
+		0.2f, 0.2f, 2, 0, BOTTOM | RIGHT, REVERSE_HEIGHT);*/
+#endif
 	
 	// ================================
 	swapBuffer();
@@ -106,6 +116,7 @@ void setClip(float x, float y, float width, float height)
 	else
 	{
 		glEnable(GL_SCISSOR_TEST);
+		//glScissor(x, devSize.height - y, width, height);
 		glScissor(x, devSize.height - y, width, height);
 	}
 }
@@ -231,7 +242,6 @@ uint8* bmp2rgba(Bitmap* bmp, int& width, int& height)
 	return rgba;
 }
 
-#define GL_CLAMP_TO_EDGE 0x812F
 Texture* createImageWithRGBA(uint8* rgba, int width, int height)
 {
 	uint32 texID;
@@ -242,8 +252,8 @@ Texture* createImageWithRGBA(uint8* rgba, int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);// GL_REPEAT
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	// 색상 그라데이션
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);// GL_LINEAR
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//GL_NEAREST
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// GL_LINEAR
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//GL_NEAREST
 
 	int pw = nextPot(width), ph = nextPot(height);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pw, ph,

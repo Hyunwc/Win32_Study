@@ -36,12 +36,27 @@ void loadOpenGL(HWND hwnd)
 	// glew Setting End
 
 	glEnable(GL_BLEND); // 알파 블렌드를 섞겠다.
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// Input Color.rgb = DST.rgb * (1.0 - SRC.alpha) + SRC.rgb* SRC.alpha
+	// Input Color.a = DST.a * (1.0 - SRC.alpha) + SRC.alpha * SRC.alpha
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	// DST(background) SRC(image)
+	// Input Color.rgb = DST.rgb * (1.0 - SRC.alpha) + SRC.rgb* SRC.alpha
+	// Input Color.a = DST.a * (1.0 - SRC.alpha) + SRC.alpha
+	
+	// frame buffer object binding texture...
+	// Input Color.rgb = DST.rgb * (1.0 - SRC.alpha) + SRC.rgb // (SRC.rgb * SRC.alpha)
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_LINE_SMOOTH);
 
 	//fbo = new iFBO(devSize.width, devSize.height);
 	fbo = new iFBO(1920, 1080);
+	fbo->tex->width = devSize.width;
+	fbo->tex->height = devSize.height;
 
 	setMakeCurrent(false);
 }
@@ -151,6 +166,9 @@ iFBO::iFBO(int width, int height)
 
 	// 해제
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	texPrev = new Texture * [10];
+	numPrev = 0;
 }
 
 iFBO::~iFBO()
@@ -160,6 +178,8 @@ iFBO::~iFBO()
 
 	glDeleteRenderbuffers(1, &depthBuffer);
 	freeImage(tex);
+
+	delete texPrev;
 }
 
 void iFBO::bind()
@@ -167,7 +187,7 @@ void iFBO::bind()
 	bind(tex);
 }
 
-void iFBO::bind(Texture* tex)
+void iFBO::_bind(Texture* tex)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo); // fbo screen
 
@@ -181,19 +201,34 @@ void iFBO::bind(Texture* tex)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, tex->width, tex->height, 0, -1024, 1024);
-	
+}
+
+void iFBO::bind(Texture* tex)
+{
+	_bind(tex);
+
+	texPrev[numPrev] = tex;
+	numPrev++;
 }
 
 // 원래대로 다시 설정
 void iFBO::unbind()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); // read screen
+	numPrev--;
+	if (numPrev)
+	{
+		_bind(texPrev[numPrev - 1]);
+	}
+	else
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0); // read screen
 
-	glViewport(viewport.origin.x, viewport.origin.y,
-		viewport.size.width, viewport.size.height);
+		glViewport(viewport.origin.x, viewport.origin.y,
+			viewport.size.width, viewport.size.height);
 
-	// ~ 해상도 지정
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, devSize.width, devSize.height, 0, -1024, 1024);
+		// ~ 해상도 지정
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, devSize.width, devSize.height, 0, -1024, 1024);
+	}
 }

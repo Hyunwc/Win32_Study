@@ -16,7 +16,15 @@ enum iPopupStyle
 {
 	iPopupStyleAlpha = 0,
 	iPopupStyleMove,
+	iPopupStyleZoom,
 };
+
+class iPopup;
+typedef void (*MethodPopupOpen)(iPopup* pop);
+typedef void (*MethodPopupDraw)(iPopup* pop, float rate);
+
+typedef void (*MethodStyle)(float dt, iPopup* pop, iPoint& position,
+	float& alpha, float& scale, float& degree);
 
 class iPopup
 {
@@ -41,4 +49,17 @@ public:
 	float aniDt, _aniDt;
 
 	int selected;
+
+	MethodPopupOpen methodOpen, methodClose;
+	MethodPopupDraw methodDrawBefore, methodDrawAfter;
 };
+
+
+void drawPopStyleAlpha(float delta, iPopup* pop, iPoint& position,
+	float& alpha, float& scale, float& degree);
+
+void drawPopStyleMove(float delta, iPopup* pop, iPoint& position,
+	float& alpha, float& scale, float& degree);
+
+void drawPopStyleZoom(float delta, iPopup* pop, iPoint& position,
+	float& alpha, float& scale, float& degree);

@@ -11,6 +11,7 @@
 #include "Comp.h"
 #include "ImageText.h"
 #include "VN.h"
+#include "4Myun.h"
 
 ParticleSystem** _ps;
 ParticleSystem* ps;
@@ -58,26 +59,26 @@ void loadGame()
 	loadImageText();
 
 	METHOD_VOID mLoad[] = {
-		loadVN, loadComp, loadOops, loadAnimating,
+		load4Myun, loadVN, loadComp, loadOops, loadAnimating,
 		loadLotto, loadTripple, loadAirShootng, loadMemory
 	};
 
 	METHOD_VOID mFree[] = {
-		freeVN, freeComp, freeOops, freeAnimating,
+		free4Myun, freeVN, freeComp, freeOops, freeAnimating,
 		freeLotto, freeTripple, freeAirShootng, freeMemory
 	};
 
 	METHOD_FLOAT mDraw[] = {
-		drawVN, drawComp, drawOops, drawAnimating,
+		draw4Myun, drawVN, drawComp, drawOops, drawAnimating,
 		drawLotto, drawTripple, drawAirShootng, drawMemory
 	};
 
 	METHOD_KEY mKey[] = {
-		keyVN, keyComp, keyOops, keyAnimating,
+		key4Myun, keyVN, keyComp, keyOops, keyAnimating,
 		keyLotto, keyTripple, keyAirShootng, keyMemory
 	};
 
-	int runIndex = 0;
+	int runIndex = 1;
 	mLoad[runIndex]();
 	methodFree = mFree[runIndex];
 	methodDraw = mDraw[runIndex];

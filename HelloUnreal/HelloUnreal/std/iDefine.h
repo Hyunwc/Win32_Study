@@ -12,8 +12,10 @@ using namespace Gdiplus;
 #pragma comment (lib, "Gdiplus.lib")
 
 #include <gl/glew.h> // 먼저 incldue 아니면 에러
+#include <gl/GL.h>
 #include <gl/GLU.h>
 #pragma comment(lib, "opengl32")
+//#pragma comment(lib, "glu32")
 
 #include <stdio.h>
 //#include <iostream>

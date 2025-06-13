@@ -6,7 +6,9 @@ void methodSM(char** line, int lineNum,
 	int pageIndex, int pageNum,
 	const char* stringName, float stringSize);
 
-Texture** texWho;
+DicWho* dw;
+Texture* texSay; // 대사
+
 // whosay s[whoIndex] -> pageIndex / pageNum
 // index total
 
@@ -27,29 +29,37 @@ void loadVN()
 #endif
 
 	sm = new ScriptMgt(methodSM);
-	int lineWidth = 150;
-	int linesOfPage = 3;
+	int lineWidth = devSize.width - 60;
+	int linesOfPage = 2;
 	sm->set(whoSay, whoSayNum,
-		"assets/CRRegular.ttf", 25,
+		"assets/CRRegular.ttf", 30,
 		lineWidth, linesOfPage, 0.1f);
 
-	texWho = createImage(5, 2, "assets/who.jpg");
-	for (int i = 0; i < 10; i++)
-	{
-		Texture* t = texWho[i];
-		t->width /= 8;
-		t->height /= 8;
-		t->potWidth /= 8;
-		t->potHeight /= 8;
-	}
+	loadDicWho();
+
+	iGraphics* g = iGraphics::getInstance();
+	iSize size = iSizeMake(devSize.width - 40, 100);
+	g->init(size.width, size.height);
+
+	setRGBA(0, 1, 1, 1);
+	g->fillRect(0, 0, size.width, size.height);
+
+	setRGBA(1, 1, 1, 1);
+	g->drawRect(3, 3, size.width - 6, size.height - 6);
+
+	texSay = g->getTexture();
+	g->clean();
+
+	createPopTest();
 }
 
 void freeVN()
 {
 	delete sm;
-	for (int i = 0; i < 10; i++)
-		freeImage(texWho[i]);
-	delete texWho;
+
+	freeDicWho();
+
+	freePopTest();
 }
 
 iStrTex** stVN = NULL;
@@ -58,10 +68,8 @@ void methodSM(char** line, int lineNum,
 	int pageIndex, int pageNum,
 	const char* stringName, float stringSize)
 {
-	setRGBA(1, 0, 0, 1);
-	float x = 0, y = 0;
-	fillRect(x, y, 150, 120); // 다이얼로그판
-	setRGBA(1, 1, 1, 1);
+	setRGBA(0, 0, 1, 1);
+	fillRect(0, 0, devSize.width, devSize.height);
 
 	if (stVN == NULL)
 	{
@@ -72,13 +80,25 @@ void methodSM(char** line, int lineNum,
 	setStringName(stringName);
 	setStringSize(stringSize);
 	setStringRGBA(1, 1, 1, 1);
-
+#if 0
+	float x = 0, y = 0;
+	fillRect(x, y, 150, 120); // 다이얼로그판
+	setRGBA(1, 1, 1, 1);
+	setRGBA(1, 0, 0, 1);
+#else
+	iPoint p = iPointMake((devSize.width - texSay->width) / 2,
+		devSize.height - texSay->height - 10);
+	setRGBA(1, 1, 1, 1);
+	drawImage(texSay, p.x, p.y, TOP | LEFT);
+#endif
+	setStringRGBA(0, 0, 0, 1);
 	// 글자 출력
 	for (int i = 0; i < lineNum; i++)
-		stVN[i]->paint(x, y + 40 * i, TOP | LEFT, line[i]);
+		stVN[i]->paint(p.x + 10, p.y + 10 + 40 * i, TOP | LEFT, line[i]);
 
+	setStringRGBA(1, 1, 1, 1);
 	// 페이지 표현
-	stVN[lineNum]->paint(x, y + 40 * lineNum, TOP | LEFT, "%d/%d",
+	stVN[lineNum]->paint(p.x, p.y - 40, TOP | LEFT, "%d/%d",
 		pageIndex + 1, pageNum);
 }
 
@@ -87,16 +107,27 @@ void drawVN(float dt)
 	setRGBA(0, 0, 0, 0);
 	clear();
 
+	// 캐릭터 얼굴이 나올때 dt = 0.0f
+	// 말풍선 애니메이션 dt = 0.0f
 	sm->paint(dt);
 
-	for (int i = 0; i < 10; i++)
-		drawImage(texWho[i], 10 + 80 * (i%5), 20 + 150 * (i/5), TOP | LEFT );
+	/*for (int i = 0; i < 10; i++)
+		drawImage(texWho[i], 10 + 80 * (i%5), 20 + 150 * (i/5), TOP | LEFT );*/
+
+	drawPopTest(dt);
+
+	//popTest->paint(dt);
 }
 
 void keyVN(iKeyStat stat, iPoint point)
 {
+	if (keyPopTest(stat, point))
+		return;
+
 	if (stat == iKeyStatBegan)
 	{
+		showPopTest(true);
+		return;
 		sm->nextPage();
 		//pageIndex = (pageIndex + 1) % pageNum;
 	}
@@ -286,25 +317,44 @@ bool ScriptMgt::nextWs()
 bool ScriptMgt::nextPage()
 {
 	pageIndex++;
-	if (aniIndex < aniTotal)
-	{
-		// skip
-		aniIndex = aniTotal;
-	}
-	else
-	{
-		// next page
-		aniIndex = 0;
-		aniDt = 0.0f;
 
-		if (pageIndex < pageNum)
+	if (pageIndex < pageNum)
+	{
+		if (aniIndex < aniTotal)
 		{
+			// skip
+			aniIndex = aniTotal;
 		}
-		else // if(pageIndex == pageNum)
+		else
 		{
-			return nextWs();
+			// next page
+			aniIndex = 0;
+			aniDt = 0.0f;
 		}
 	}
+	else// if (pageIndex == pageNum)
+	{
+		return nextWs();
+	}
+	//if (aniIndex < aniTotal)
+	//{
+	//	// skip
+	//	aniIndex = aniTotal;
+	//}
+	//else
+	//{
+	//	// next page
+	//	aniIndex = 0;
+	//	aniDt = 0.0f;
+
+	//	if (pageIndex < pageNum)
+	//	{
+	//	}
+	//	else // if(pageIndex == pageNum)
+	//	{
+	//		return nextWs();
+	//	}
+	//}
 	return true;
 }
 
@@ -379,4 +429,160 @@ void copyLine(char** src, int srcNum, char** dst, int& dstNum, int len)
 	dstNum = m + 1;
 	if (dstNum > srcNum)
 		dstNum = srcNum;
+}
+
+void loadDicWho()
+{
+	const char* strKey[10] = {
+		"이재명", "김문수", "안철수", "나경원", "윤석열",
+		"임수아", "김성민", "조상현", "진정우", "김태현"
+	};
+
+	Texture** texs = createImage(5, 2, "assets/who.jpg");
+	dw = new DicWho[10];
+	for (int i = 0; i < 10; i++)
+	{
+		DicWho* d = &dw[i];
+		d->tex = texs[i];
+		d->key = iString::copy(strKey[i]);
+		 
+		Texture* t = d->tex;
+		t->width /= 8;
+		t->height /= 8;
+		t->potWidth /= 8;
+		t->potHeight /= 8;
+	}
+
+	delete texs;
+}
+
+void freeDicWho()
+{
+	for (int i = 0; i < 10; i++)
+	{
+		DicWho* d = &dw[i];
+		freeImage(d->tex);
+		delete d->key;
+	}
+	delete dw;
+}
+
+Texture* getDicWho(const char* key)
+{
+	for (int i = 0; i < 10; i++)
+	{
+		DicWho* d = &dw[i];
+		if (strcmp(d->key, key) == 0)
+			return d->tex;
+	}
+
+	return NULL;
+}
+
+// ==================
+// PopTest
+// ==================
+
+iPopup* popTest;
+
+void openPopTest(iPopup* pop);
+void closePopTest(iPopup* pop);
+void drawPopTest(iPopup* pop, float rate);
+
+void createPopTest()
+{
+	iPopup* pop = new iPopup();
+
+	Texture* tex = createImage("assets/down2.jpg");
+	iImage* img = new iImage();
+	img->add(tex);
+	freeImage(tex);
+	pop->add(img);
+
+	pop->style = iPopupStyleZoom;
+	pop->_aniDt = 0.5f;
+	pop->methodOpen = openPopTest;
+	pop->methodClose = closePopTest;
+	pop->methodDrawBefore = drawPopTest;
+	pop->methodDrawAfter = NULL;
+
+	pop->sp = iPointZero;
+	pop->ep = iPointMake(100, 100);
+
+	popTest = pop;
+}
+
+void freePopTest()
+{
+	delete popTest;
+}
+
+void showPopTest(bool show)
+{
+	if (show)
+	{
+
+	}
+	else
+	{
+
+	}
+	popTest->show(show);
+}
+
+void openPopTest(iPopup* pop)
+{
+	printf("popTest열렸네??\n");
+}
+void closePopTest(iPopup* pop)
+{
+	printf("popTest닫혔네??\n");
+}
+// 메인에 그려지기 이전에 불림
+void drawPopTest(iPopup* pop, float rate)
+{
+	float alpha;
+	if (pop->stat == iPopupStatOpen)
+	{
+		// 열려있을 때 로직을 실행
+		alpha = 0.7f * rate;
+	}
+	else if (pop->stat == iPopupStatProc)
+	{
+		// 활짝 열렸을 때
+		alpha = 0.7f;
+	}
+	else if (pop->stat == iPopupStatClose)
+	{
+		alpha = 0.7f * (1.0f - rate);
+	}
+
+	setRGBA(0, 0, 0, alpha);
+	fillRect(0, 0, devSize.width, devSize.height);
+	setRGBA(1, 1, 1, 1);
+}
+
+void drawPopTest(float dt)
+{
+	popTest->paint(dt);
+}
+
+bool keyPopTest(iKeyStat stat, iPoint point)
+{
+	if (popTest->bShow == false)
+		return false;
+	if (popTest->stat != iPopupStatProc)
+		return true;
+
+	switch (stat)
+	{
+	case iKeyStatBegan:
+		showPopTest(false);
+		break;
+	case iKeyStatMoved:
+		break;
+	case iKeyStatEnded:
+		break;
+	}
+	return true;
 }
