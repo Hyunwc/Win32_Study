@@ -50,16 +50,32 @@ void freeApp()
 
 void drawApp(float dt)
 {
+#if 1
+	setMakeCurrent(true);
+
+
+	glClearColor(1, 0, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	setLineWidth(30);
+	drawLine(10, 10, 100, 100);
+
+	swapBuffer();
+	setMakeCurrent(false);
+	return;
+
+#endif
 	setMakeCurrent(true);
 	// ================================
-	resizeOpenGL(0, 0);
 
+	resizeOpenGL(0, 0);
 #if 0
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 	methodDraw(dt);
 #else 
 	// back buffer(bmp::graphics)
+
 	fbo->bind();
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -127,7 +143,8 @@ void setLineWidth(float width)
 	lineWidth = width;
 }
 
-void drawLine(float x0, float y0, float x1, float y1)
+// openGL 3.0으로 넘어오면서 밑 기능들을 사용할 수 없게됨
+void drawLine_deprecated(float x0, float y0, float x1, float y1)
 {
 	float position[] = {
 		x0, y0, x1, y1
@@ -143,6 +160,148 @@ void drawLine(float x0, float y0, float x1, float y1)
 	glDrawElements(GL_LINES, 2, GL_UNSIGNED_BYTE, indices);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void CheckShaderID(uint32 id)
+{
+	GLint result;
+	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+	if (result == GL_TRUE)
+		return;
+
+	int length;
+	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+	char* s = new char[1 + length];
+	glGetShaderInfoLog(id, length, NULL, s);
+	s[length] = 0;
+	printf("checkShaderID Error!!\n(%s)\n", s);
+	delete s;
+}
+
+void CheckProgramID(uint32 id)
+{
+	GLint result;
+	glGetProgramiv(id, GL_LINK_STATUS, &result);
+	if (result == GL_TRUE)
+		return;
+
+	int length;
+	glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
+	char* s = new char[1 + length];
+	glGetProgramInfoLog(id, length, NULL, s);
+	s[length] = 0;
+	printf("checkProgramID Error!!\n(%s)\n", s);
+	delete s;
+}
+
+uint32 build(const char* strVertex, const char* strFrag)
+{
+	uint32 vertID = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertID, 1, &strVertex, NULL);
+	glCompileShader(vertID);
+	// check error(compile)
+	CheckShaderID(vertID);
+
+	uint32 fragID = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragID, 1, &strFrag, NULL);
+	glCompileShader(fragID);
+	// check error(compile)
+	CheckShaderID(fragID);
+
+	uint32 programID = glCreateProgram();
+	glAttachShader(programID, vertID);
+	glAttachShader(programID, fragID);
+	glLinkProgram(programID);
+	glDetachShader(programID, vertID);
+	glDetachShader(programID, fragID);
+	// check error(link)
+	CheckProgramID(programID);
+
+	glDeleteShader(vertID);
+	glDeleteShader(fragID);
+
+	return programID;
+}
+
+uint32 buildFromPath(const char* pathVertex, const char* pathFrag)
+{
+	int len;
+	char* strVert = loadFile(len, pathVertex);
+	char* strFrag = loadFile(len, pathFrag);
+	uint32 programID = build(strVert, strFrag);
+	delete strVert;
+	delete strFrag;
+
+	return programID;
+}
+
+void drawLine(float x0, float y0, float x1, float y1)
+{
+	// cpu(준비) =>  (컨버팅/번역 == 변환) == (쉐이더) =>  gpu(그리기)
+	// shader (vertex + fragment)
+
+	//static uint32 programID = build(strVertex, strFrag);
+	static uint32 programID = buildFromPath("assets/line.vert", "assets/line.frag");
+	glUseProgram(programID);
+
+	// 비효율
+	/*float sx = (x0 < x1 ? x0 : x1);
+	float sy = (y0 < y1 ? y0 : y1);
+	float dx = fabsf(x0 - x1);
+	float dy = fabsf(y0 - y1);
+
+	float position[] = {
+		sx, sy,		 0, 1,  sx + dx, sy,	  0, 1,
+		sx, sy + dy, 0, 1,  sx + dx, sy + dy, 0, 1,
+	};*/
+
+	// 효율
+	float half = lineWidth / 2 + 0.5f;
+	float dx = x1 - x0, dy = y1 - y0;
+	float d = sqrtf(dx * dx + dy * dy) / 2 + half;
+	float x = (x0 + x1) / 2.0f;
+	float y = (y0 + y1) / 2.0f;
+	float position[] = {
+		-d, -half, 0, 1,   d, -half, 0, 1,
+		-d, half, 0, 1,   d, half, 0, 1,
+	};
+
+	//glm::mat4 projMatrix = glm::ortho(0.0f, devSize.width, devSize.height, 0.0f, -1000.0f, 1000.0f);
+	
+	glm::mat4 projMatrix = glm::ortho(0.0f, devSize.width, 0.0f, devSize.height, -1000.0f, 1000.0f);
+	//glm::mat4 t(1.0f);
+	//t = glm::rotate(t, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//projMatrix = projMatrix * t;
+
+	glm::mat4 viewMatrix(1.0f); // 크기가 1인 단위 행렬
+	viewMatrix = glm::translate(viewMatrix, glm::vec3(x, y, 0));
+	float theta = atan((float)dy / dx);// *180 / M_PI;
+	viewMatrix = glm::rotate(viewMatrix, theta, glm::vec3(0, 0, 1));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo); // 1
+	// memcpy
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 16, position);
+	uint32 pAttr = glGetAttribLocation(programID, "position");
+	glEnableVertexAttribArray(pAttr); // 2
+	glVertexAttribPointer(pAttr, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (const void*)0);
+
+	//line.vert의 uniform mat4 projMatrix, viewMatrix에 접근하고싶다
+	uint32 pID = glGetUniformLocation(programID, "projMatrix");
+	glUniformMatrix4fv(pID, 1, false, (float*)&projMatrix);
+	uint32 vID = glGetUniformLocation(programID, "viewMatrix");
+	glUniformMatrix4fv(vID, 1, false, (float*)&viewMatrix);
+
+	glUniform2f(glGetUniformLocation(programID, "u_start"), x0, y0);
+	glUniform2f(glGetUniformLocation(programID, "u_end"), x1, y1);
+	glUniform1f(glGetUniformLocation(programID, "u_width"), lineWidth);
+	glUniform4f(glGetUniformLocation(programID, "u_color"), _r, _g, _b, _a);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbe); // 3
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // 3
+
+	glDisableVertexAttribArray(pAttr); // 2
+	glBindBuffer(GL_ARRAY_BUFFER, 0);  // 1
 }
 
 void drawLine(iPoint p0, iPoint p1)
