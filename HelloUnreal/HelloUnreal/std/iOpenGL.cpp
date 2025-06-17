@@ -6,6 +6,10 @@ HWND hwnd;
 HDC hdc;
 HGLRC hrc; // 그래픽 라이브러리 리소스 // opengl 사용하기 위한 도구
 
+// vao : vertex array object
+uint32 vao, vbo, vbe;
+Vertex* vertex;
+
 void loadOpenGL(HWND hwnd)
 {
 	// 전역변수로 사용되는 hwnd에 파라미터 대입
@@ -24,20 +28,47 @@ void loadOpenGL(HWND hwnd)
 	int pixelFormat = ChoosePixelFormat(hdc, &pfd);
 	SetPixelFormat(hdc, pixelFormat, &pfd);
 	hrc = wglCreateContext(hdc);
-	// ~ OpenGL Setting End
 
 	setMakeCurrent(true);
 
-	// glew Setting Begin
 	glewExperimental = TRUE;
 	GLenum error = glewInit();
 	if (error != GLEW_OK)
 		return;
+
+	// 유효성 체크
+	if (wglewIsSupported("WGL_ARB_create_context"))
+	{
+		setMakeCurrent(false);
+		wglDeleteContext(hrc);
+
+		int attr[] = {
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+			WGL_CONTEXT_FLAGS_ARB, 0,
+			0,
+		};
+
+		hrc = wglCreateContextAttribsARB(hdc, NULL, attr);
+	}
+	
+	setMakeCurrent(true);
+
+#if 1
+	const char* strGL = (const char*)glGetString(GL_VERSION);
+	const char* strGLEW = (const char*)glewGetString(GLEW_VERSION);
+	const char* strGLSL = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+	printf("OpenGL Version : %s\nGLEW Version : %s\nGLSL Version : %s\n",
+		strGL, strGLEW, strGLSL);
+#endif
+	// ~ OpenGL Setting End
+
+	// glew Setting Begin
+	
 	// glew Setting End
 
 	glEnable(GL_BLEND); // 알파 블렌드를 섞겠다.
 
-	
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Input Color.rgb = DST.rgb * (1.0 - SRC.alpha) + SRC.rgb* SRC.alpha
 	// Input Color.a = DST.a * (1.0 - SRC.alpha) + SRC.alpha * SRC.alpha
@@ -53,6 +84,20 @@ void loadOpenGL(HWND hwnd)
 
 	glEnable(GL_LINE_SMOOTH);
 
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 4, NULL, GL_STATIC_DRAW);
+	vertex = new Vertex[4];
+
+	glGenBuffers(1, &vbe);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbe);
+	uint8 indices[] = { 0, 1, 2,  2, 1, 3 };
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint8) * 6, indices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 	//fbo = new iFBO(devSize.width, devSize.height);
 	fbo = new iFBO(1920, 1080);
 	fbo->tex->width = devSize.width;
@@ -63,6 +108,10 @@ void loadOpenGL(HWND hwnd)
 
 void freeOpenGL()
 {
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &vbe);
+
 	wglMakeCurrent(NULL, NULL); // 사용x
 	wglDeleteContext(hrc);
 	ReleaseDC(hwnd, hdc);
