@@ -27,6 +27,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     runApp = false;
     int x = 0, y = 0, w = 640, h = 480;
+
+    /*AdjustWindowRectEx();
+    RECT rt;
+    AdjustWindowRect();*/
+
     HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
         x, y, 1920, 1080, nullptr, nullptr, hInstance, nullptr);
     ShowWindow(hWnd, nCmdShow);

@@ -9,10 +9,6 @@ uniform vec2 u_end;
 uniform float u_width;
 uniform vec4 u_color;
 
-in vec4 vColor;
-in vec4 vTexCoord;
-in vec4 vNormal;
-
 out vec4 fragColor;				
 				
 float getDistance(vec2 p, vec2 s, vec2 e, float width)
@@ -25,11 +21,6 @@ float getDistance(vec2 p, vec2 s, vec2 e, float width)
 	vec2 proj = clamp(dot(m, n), 0.0, len) * n;
 
 	return length(m - proj) - width / 2.;
-}
-
-void test(out vec4 fragColor)
-{
-	fragColor *= 0.5f;
 }
 
 void main()
