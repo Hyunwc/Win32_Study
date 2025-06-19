@@ -164,6 +164,11 @@ void drawLemonMenu(float dt)
 		imgMenuBtn[i]->index = (i == selectedMenu);
 		imgMenuBtn[i]->paint(dt, iPointZero);
 	}
+
+	void drawShadertoy(float dt);
+	glClearColor(0, 0, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	drawShadertoy(dt);
 }
 
 void keyLemonMenu(iKeyStat stat, iPoint point)

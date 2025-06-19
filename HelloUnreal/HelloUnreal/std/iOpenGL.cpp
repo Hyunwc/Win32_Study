@@ -127,12 +127,12 @@ void resizeOpenGL(int width, int height)
 		viewport.size.width, viewport.size.height);
 
 	// ~ 해상도 지정
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, devSize.width, devSize.height, 0, -1024, 1024);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
+	//glOrtho(0, devSize.width, devSize.height, 0, -1024, 1024);
+	//
+	//glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
 
 
 	//glPushMatrix(); // backup
@@ -280,4 +280,163 @@ void iFBO::unbind()
 		glLoadIdentity();
 		glOrtho(0, devSize.width, devSize.height, 0, -1024, 1024);
 	}
+}
+
+uint32 iShader::compile(const char* strCode, int option)
+{
+	uint32 id = glCreateShader(option);
+	glShaderSource(id, 1, &strCode, NULL);
+	glCompileShader(id);
+	checkShader(id);
+
+	return id;
+}
+
+uint32 iShader::compileVert(const char* strCode)
+{
+	return compile(strCode, GL_VERTEX_SHADER);
+}
+
+uint32 iShader::compileFrag(const char* strCode)
+{
+	return compile(strCode, GL_FRAGMENT_SHADER);
+}
+
+void iShader::checkShader(uint32 id)
+{
+	GLint result;
+	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+	if (result == GL_TRUE)
+		return;
+
+	int length;
+	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+	char* s = new char[1 + length];
+	glGetShaderInfoLog(id, length, NULL, s);
+	s[length] = 0;
+	printf("checkShaderID Error!!\n(%s)\n", s);
+	delete s;
+}
+
+void iShader::deleteShader(uint32 id)
+{
+	glDeleteShader(id);
+}
+
+void iShader::deleteProgram(uint32 id)
+{
+	glDeleteProgram(id);
+}
+
+uint32 iShader::link(uint32 vertID, uint32 fragID)
+{
+	uint32 id = glCreateProgram();
+	glAttachShader(id, vertID);
+	glAttachShader(id, fragID);
+	glLinkProgram(id);
+	glDetachShader(id, vertID);
+	glDetachShader(id, fragID);
+	checkProgram(id);
+
+	return id;
+}
+
+void iShader::checkProgram(uint32 id)
+{
+	GLint result;
+	glGetProgramiv(id, GL_LINK_STATUS, &result);
+	if (result == GL_TRUE)
+		return;
+
+	int length;
+	glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
+	char* s = new char[1 + length];
+	glGetProgramInfoLog(id, length, NULL, s);
+	s[length] = 0;
+	printf("checkProgramID Error!!\n(%s)\n", s);
+	delete s;
+}
+
+uint32 iShader::build(const char* strVertex, const char* strFrag)
+{
+	uint32 vertID = compileVert(strVertex);
+	uint32 fragID = compileFrag(strFrag);
+
+	uint32 programID = link(vertID, fragID);
+
+	deleteShader(vertID);
+	deleteShader(fragID);
+
+	return programID;
+}
+
+uint32 iShader::buildFromPath(const char* pathVertex, const char* pathFrag)
+{
+	int len;
+	char* strVert = loadFile(len, pathVertex);
+	char* strFrag = loadFile(len, pathFrag);
+	uint32 programID = build(strVert, strFrag);
+	delete strVert;
+	delete strFrag;
+
+	return programID;
+}
+
+uint32 iShader::buildShaderToy(const char* pathVertex, const char* pathFrag)
+{
+	int len;
+	char* strVert = loadFile(len, pathVertex);
+	char* strFrag = loadFile(len, pathFrag);
+
+	const char* strBefore = "                   \n\
+        #version 150                            \n\
+                                                \n\
+        #ifdef GL_ES                            \n\
+        precision mediump float;                \n\
+        #endif                                  \n\
+                                                \n\
+        uniform vec3      iResolution;          \n\
+        uniform float     iTime;                \n\
+        uniform float     iTimeDelta;           \n\
+        uniform float     iFrameRate;           \n\
+        uniform int       iFrame;               \n\
+        uniform float     iChannelTime[4];      \n\
+        uniform vec3      iChannelResolution[4];\n\
+        uniform vec4      iMouse;               \n\
+        uniform sampler2D iChannel0;            \n\
+        uniform sampler2D iChannel1;            \n\
+        uniform sampler2D iChannel2;            \n\
+        uniform sampler2D iChannel3;            \n\
+        uniform vec4      iDate;                \n\
+        uniform float     iSampleRate;          \n\
+                                                \n\
+        out vec4 fragColor;                     \n";
+
+#if 0 // strFrag 쉐이더토이 받은 파일
+	void mainImage(out vec4 fragColor, in vec2 fragCoord)
+	{
+
+	}
+#endif
+
+	const char* strAfter = "						\
+		void main()									\
+		{											\
+			mainImage(fragColor, gl_FragCoord.xy);  \
+		}";
+
+	int lenBefore = strlen(strBefore);
+	int lenAfter = strlen(strAfter);
+	int lenTotal = lenBefore + len + lenAfter;
+	char* str = new char[lenTotal + 1];
+	strcpy(str, strBefore);
+	strcpy(&str[lenBefore], strFrag);
+	strcpy(&str[lenBefore + len], strAfter);
+
+	uint32 programID = build(strVert, str);
+	delete strVert;
+	delete strFrag;
+	delete str;
+
+	return programID;
 }

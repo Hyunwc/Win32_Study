@@ -50,35 +50,8 @@ void freeApp()
 
 void drawApp(float dt)
 {
-#if 1
-	setMakeCurrent(true);
-
-	// gl 뷰포트 지정
-	glViewport(viewport.origin.x, viewport.origin.y,
-		viewport.size.width, viewport.size.height);
-
-	glClearColor(1, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	setLineWidth(20);
-
-	setRGBA(0, 1, 0, 0.5f);
-	drawLine(30, 30, 300, 200);
-	setRGBA(0, 0, 1, 0.5f);
-	fillRect(50, 60, 400, 150);
-
-	/*static Texture* tex = createImage("assets/def.png");
-	setRGBA(1, 1, 1, 1);
-	drawImage(tex, 0, 0, TOP | LEFT);*/
-
-	swapBuffer();
-	setMakeCurrent(false);
-	return;
-
-#endif
 	setMakeCurrent(true);
 	// ================================
-
 	resizeOpenGL(0, 0);
 #if 0
 	glClearColor(0, 0, 0, 1);
@@ -86,7 +59,6 @@ void drawApp(float dt)
 	methodDraw(dt);
 #else 
 	// back buffer(bmp::graphics)
-
 	fbo->bind();
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -173,88 +145,14 @@ void drawLine_deprecated(float x0, float y0, float x1, float y1)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void CheckShaderID(uint32 id)
-{
-	GLint result;
-	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-	if (result == GL_TRUE)
-		return;
-
-	int length;
-	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-	char* s = new char[1 + length];
-	glGetShaderInfoLog(id, length, NULL, s);
-	s[length] = 0;
-	printf("checkShaderID Error!!\n(%s)\n", s);
-	delete s;
-}
-
-void CheckProgramID(uint32 id)
-{
-	GLint result;
-	glGetProgramiv(id, GL_LINK_STATUS, &result);
-	if (result == GL_TRUE)
-		return;
-
-	int length;
-	glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
-	char* s = new char[1 + length];
-	glGetProgramInfoLog(id, length, NULL, s);
-	s[length] = 0;
-	printf("checkProgramID Error!!\n(%s)\n", s);
-	delete s;
-}
-
-uint32 build(const char* strVertex, const char* strFrag)
-{
-	uint32 vertID = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertID, 1, &strVertex, NULL);
-	glCompileShader(vertID);
-	// check error(compile)
-	CheckShaderID(vertID);
-
-	uint32 fragID = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragID, 1, &strFrag, NULL);
-	glCompileShader(fragID);
-	// check error(compile)
-	CheckShaderID(fragID);
-
-	uint32 programID = glCreateProgram();
-	glAttachShader(programID, vertID);
-	glAttachShader(programID, fragID);
-	glLinkProgram(programID);
-	glDetachShader(programID, vertID);
-	glDetachShader(programID, fragID);
-	// check error(link)
-	CheckProgramID(programID);
-
-	glDeleteShader(vertID);
-	glDeleteShader(fragID);
-
-	return programID;
-}
-
-uint32 buildFromPath(const char* pathVertex, const char* pathFrag)
-{
-	int len;
-	char* strVert = loadFile(len, pathVertex);
-	char* strFrag = loadFile(len, pathFrag);
-	uint32 programID = build(strVert, strFrag);
-	delete strVert;
-	delete strFrag;
-
-	return programID;
-}
-
 void drawLine(float x0, float y0, float x1, float y1)
 {
 	// cpu(준비) =>  (컨버팅/번역 == 변환) == (쉐이더) =>  gpu(그리기)
 	// shader (vertex + fragment)
 
 	//static uint32 programID = build(strVertex, strFrag);
-	static uint32 programID = buildFromPath("assets/shader/gdi.vert", "assets/shader/line.frag");
+	static uint32 programID = iShader::buildFromPath("assets/shader/gdi.vert", "assets/shader/line.frag");
 	glUseProgram(programID);
-
 
 	// 영역을 할당하고 계산해야 하기때문
 #if 0// 비효율
@@ -302,13 +200,13 @@ void drawLine(float x0, float y0, float x1, float y1)
 
 	// x0, y0 in 640x480 -> in viewport
 
-	float r = viewport.size.width / devSize.width;
-	x0 = viewport.origin.x + x0 * r;
-	y0 = devSize.height - y0;
-	y0 = viewport.origin.y + y0 * r;
-	x1 = viewport.origin.x + x1 * r;
-	x1 = devSize.height - y1;
-	x1 = viewport.origin.y + y1 * r;
+	//float r = viewport.size.width / devSize.width;
+	//x0 = viewport.origin.x + x0 * r;
+	//y0 = devSize.height - y0;
+	//y0 = viewport.origin.y + y0 * r;
+	//x1 = viewport.origin.x + x1 * r;
+	//x1 = devSize.height - y1;
+	//x1 = viewport.origin.y + y1 * r;
 	glUniform2f(glGetUniformLocation(programID, "u_start"), x0, y0);
 	glUniform2f(glGetUniformLocation(programID, "u_end"), x1, y1);
 	glUniform1f(glGetUniformLocation(programID, "u_width"), lineWidth);
@@ -363,8 +261,8 @@ void fillRect_derecated(float x, float y, float width, float height)
 
 void fillRect(float x, float y, float width, float height, float radius)
 {
-	static uint32 programID = buildFromPath("assets/shader/gdi.vert", "assets/shader/rect.frag");
-	glUseProgram(programID);
+	static uint32 programID = iShader::buildFromPath("assets/shader/gdi.vert", "assets/shader/rect.frag");
+	glUseProgram(programID);  // 셰이더 프로그램 적용. 0이면 기본 파이프라인 사용
 
 	float position[] = {
 		x, y,		   0, 1,	x + width, y,		   0, 1,
@@ -374,26 +272,28 @@ void fillRect(float x, float y, float width, float height, float radius)
 	glm::mat4 projMatrix = glm::ortho(0.0f, devSize.width, devSize.height, 0.0f, -1000.0f, 1000.0f);
 	glm::mat4 viewMatrix(1.0f);
 
+	// gpu에 연결?
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);// 1
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 16, position);
 	uint32 pAttr = glGetAttribLocation(programID, "position");
 	glEnableVertexAttribArray(pAttr);// 2
 	glVertexAttribPointer(pAttr, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (const void*)0);
 
+	// vert의 uniform matrix에 접근
 	uint32 pID = glGetUniformLocation(programID, "projMatrix");
 	glUniformMatrix4fv(pID, 1, false, (float*)&projMatrix);
 	uint32 vID = glGetUniformLocation(programID, "viewMatrix");
 	glUniformMatrix4fv(vID, 1, false, (float*)&viewMatrix);
 
 	// x, y, width, height in 640 x 480
-	float r = viewport.size.width / devSize.width;
-	x = viewport.origin.x + x * r;
-	y = devSize.height - y;
-	y = viewport.origin.y + y * r;
-	width *= r;
-	height *= r;
-	radius *= r;
-	glUniform4f(glGetUniformLocation(programID, "u_rect"), x, y , width, height);
+	//float r = viewport.size.width / devSize.width;
+	//x = viewport.origin.x + x * r;
+	//y = devSize.height - y;
+	//y = viewport.origin.y + y * r;
+	//width *= r;
+	//height *= r;
+	//radius *= r;
+	glUniform4f(glGetUniformLocation(programID, "u_rect"), x + width / 2, y + height / 2 , width / 2, height / 2);
 	glUniform4f(glGetUniformLocation(programID, "u_color"), _r, _g, _b, _a);
 	glUniform1f(glGetUniformLocation(programID, "u_radius"), radius);
 
@@ -729,7 +629,7 @@ void drawImage(Texture* tex, float x, float y,
 	};
 
 	//static uint32 programID;
-	static uint32 programID = buildFromPath("assets/shader/std.vert", "assets/shader/alpha.frag");
+	static uint32 programID = iShader::buildFromPath("assets/shader/std.vert", "assets/shader/alpha.frag");
 	glUseProgram(programID);
 
 	uint32 pID = glGetUniformLocation(programID, "projMatrix");
@@ -744,7 +644,7 @@ void drawImage(Texture* tex, float x, float y,
 	for (int i = 0; i < 4; i++)
 	{
 		Vertex* v = &vertex[i];
-		memcpy(v->position, &p[i], sizeof(float) * 2);
+		memcpy(v->position, &p[i], sizeof(iPoint));
 		v->position[2] = 0;
 		v->position[3] = 1;
 		memcpy(v->texCoord, &texCoord[2 * i], sizeof(float) * 2);
@@ -763,7 +663,7 @@ void drawImage(Texture* tex, float x, float y,
 	// 끝에 인자는 구조체간 간격
 	glVertexAttribPointer(pAttr, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)(sizeof(float) * 0));
 	glVertexAttribPointer(cAttr, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)(sizeof(float) * 4));
-	glVertexAttribPointer(tAttr, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)(sizeof(float) * 8));
+	glVertexAttribPointer(tAttr, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)(sizeof(float) * 8));
 
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glEnableClientState(GL_COLOR_ARRAY);
@@ -838,6 +738,84 @@ void setStringRGBA(float r, float g, float b, float a)
 void getStringRGBA(float& r, float& g, float& b, float& a)
 {
 	r = sr; g = sg; b = sb; a = sa;
+}
+
+void drawShadertoy(float dt)
+{
+	iPoint position[] = {
+		0, 0,				devSize.width, 0,
+		0, devSize.height,  devSize.width, devSize.height,
+	};
+
+	glm::mat4 projMatrix = glm::ortho(0.0f, devSize.width, devSize.height, 0.0f, -1000.0f, 1000.0f);
+	glm::mat4 viewMatrix(1.0f);
+
+	static uint32 programID = iShader::buildShaderToy("assets/shader/gdi.vert", "assets/shader/st.frag");
+	glUseProgram(programID);
+
+	uint32 pID = glGetUniformLocation(programID, "projMatrix");
+	glUniformMatrix4fv(pID, 1, false, (float*)&projMatrix);
+	uint32 vID = glGetUniformLocation(programID, "viewMatrix");
+	glUniformMatrix4fv(vID, 1, false, (float*)&viewMatrix);
+
+#define uniform3f(id, x, y, z) glUniform3f(glGetUniformLocation(programID, id), x, y, z)
+#define uniform1f(id, x)	   glUniform1f(glGetUniformLocation(programID, id), x)
+#define uniform1i(id, x)	   glUniform1i(glGetUniformLocation(programID, id), x)
+	uniform3f("iResolution", devSize.width, devSize.height, 0);
+	static float iTime = 0.0f;
+	uniform1f("iTime", iTime);
+	iTime += dt;
+	uniform1f("iTimeDelta", dt);
+	uniform1f("iFrameRate", 0);
+	uniform1f("iFrameRate", 0);
+	static int iFrame = 0;
+	uniform1i("iFrame", iFrame);
+	iFrame++;
+#if 0
+	uniform float     iChannelTime[4];
+	uniform vec3      iChannelResolution[4];
+	uniform vec4      iMouse;
+	uniform sampler2D iChannel0;
+	uniform sampler2D iChannel1;
+	uniform sampler2D iChannel2;
+	uniform sampler2D iChannel3;
+	uniform vec4      iDate;
+	uniform float     iSampleRate;
+#endif
+	static Texture** texs = NULL;
+	if (texs == NULL)
+	{
+		texs = new Texture * [4];
+		for (int i = 0; i < 4; i++)
+			texs[i] = createImage("assets/shader/%d.%s", i, i == 2 ? "png" : "jpg");
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		char id[16];
+		sprintf(id, "iChannel%d", i);
+		glUniform1i(glGetUniformLocation(programID, id), i);
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, texs[i]->texID);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);// 1
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 16, position);
+
+	uint32 pAttr = glGetAttribLocation(programID, "position");
+	glEnableVertexAttribArray(pAttr);// 2
+	glVertexAttribPointer(pAttr, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)(sizeof(float) * 0));
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbe);// 3
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);// 3
+
+	glDisableVertexAttribArray(pAttr);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);// 1
+	for (int i = 0; i < 4; i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 void drawString(float x, float y, int anc, const char* szFormat, ...)
