@@ -742,9 +742,9 @@ void getStringRGBA(float& r, float& g, float& b, float& a)
 
 void drawShadertoy(float dt)
 {
-	iPoint position[] = {
-		0, 0,				devSize.width, 0,
-		0, devSize.height,  devSize.width, devSize.height,
+	float position[] = {
+		0, 0, 0, 1,				 devSize.width, 0, 0, 1,
+		0, devSize.height,0, 1,  devSize.width, devSize.height, 0, 1
 	};
 
 	glm::mat4 projMatrix = glm::ortho(0.0f, devSize.width, devSize.height, 0.0f, -1000.0f, 1000.0f);
@@ -803,7 +803,7 @@ void drawShadertoy(float dt)
 
 	uint32 pAttr = glGetAttribLocation(programID, "position");
 	glEnableVertexAttribArray(pAttr);// 2
-	glVertexAttribPointer(pAttr, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)(sizeof(float) * 0));
+	glVertexAttribPointer(pAttr, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (const void*)(sizeof(float) * 0));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbe);// 3
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);

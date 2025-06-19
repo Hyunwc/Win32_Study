@@ -27,10 +27,9 @@ iShadertoy::iShadertoy()
 iShadertoy::~iShadertoy()
 {
 	for (int i = 0; i < 5; i++)
-	{
-
-	}
+		iShader::deleteProgram(programID[i]);
 	delete programID;
+
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 2; j++)
@@ -54,10 +53,19 @@ void iShadertoy::setUniform(float dt, uint32 programID)
 	uniform1f("iTimeDelta", dt);
 	uniform1f("iFrameRate", 0);
 	uniform1i("iFrame", iFrame); iFrame++;
-	/*for (int i = 0; i < 4; i++)
-		uniform1f("iChannelTime[0]", iChannelTime[0]);*/
+	
+#if 1
 	uniform1fv("iChannelTime", 4, iChannelTime);
-
+#elif 0
+	uniform4f("iChannelTime", iChannelTime[0], iChannelTime[1], iChannelTime[2], iChannelTime[3]);
+#else
+	for (int i = 0; i < 4; i++)
+	{
+		char s[16];
+		sprintf(s, "iChannelTime[%d]", i);
+		uniform1f("s", iChannelTime[i]);
+	}
+#endif
 	float v[12] = {
 		texs[0][0]->width, texs[0][0]->height, 0,
 		texs[1][0]->width, texs[1][0]->height, 0,
@@ -80,14 +88,14 @@ void iShadertoy::paint(float dt)
 		}
 
 		uint32 programID = this->programID[i];
-		glUseProgram(programID); // proid를 사용할게
+		glUseProgram(programID); // programID를 사용할게
 
 		glm::mat4 projMatrix = glm::ortho(0.0f, devSize.width, devSize.height, 0.0f, -1000.0f, 1000.0f);
 		uniformMat("projMatrix", projMatrix);
 		glm::mat4 viewMatrix(1.0f);
 		uniformMat("viewMatrix", viewMatrix);
 
-		setUniform(dt, programID);
+		setUniform(dt, programID); // shadertoy uniform setting
 
 		// 포지션의 정점 데이터를 vbo에게 넘기고
 		float position[] = {
@@ -150,6 +158,7 @@ void iShadertoy::key(iKeyStat stat, iPoint point)
 		}
 		break;
 	case iKeyStatEnded:
+		iMouse[2] = 0;
 		break;
 	}
 }
