@@ -98,6 +98,18 @@ struct Texture
 	int retainCount;
 };
 
+enum TextureWrap
+{
+	TextureWrapClamp = 0,
+	TextureWrapReqeat,
+};
+
+enum TextureFilter
+{
+	TextureFilterLinear = 1,
+	TextureFilterNearest
+};
+
 #define va_start_end(szFormat, szText) 						\
 		va_list args;										\
 		va_start(args, szFormat);							\

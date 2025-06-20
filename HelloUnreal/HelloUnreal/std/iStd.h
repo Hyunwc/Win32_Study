@@ -17,6 +17,7 @@
 #include "iFPS.h"
 #include "iSort.h"
 #include "iShortestPath.h"
+#include "iShadertoy.h"
 
 // keydown 눌렀을 때 1번 발생
 // keystat 누르고 있을 때 계속 발생
@@ -58,6 +59,11 @@ void setImageFilter(MethodImageFilter method);
 Texture* createImageFilter(const char* szFormat, ...);
 void imageFilterGrey(uint8* bgra, int width, int height, int stride);
 void imageFilterMirror(uint8* bgra, int width, int height, int stride);
+
+void setImage(TextureWrap w, TextureFilter f);
+void applyImage();
+
+void setImage(Texture* tex, TextureWrap w, TextureFilter f);
 
 Texture* createImage(const char* szFormat, ...);
 Texture** createImage(int wNum, int hNum, const char* szFormat, ...);

@@ -2,10 +2,21 @@
 
 #include "iDefine.h"
 
+struct STInfo
+{
+	const char* pathVert;
+	const char* pathFrag[5];
+	// programID[5]
+	Texture* tex[5][4];
+	int buf[5][4];
+};
+
+extern STInfo stInfo;
+
 class iShadertoy
 {
 public:
-	iShadertoy();
+	iShadertoy(STInfo* info);
 	virtual ~iShadertoy();
 
 private:
@@ -18,9 +29,10 @@ public:
 	uint32* programID;
 
 	//Texture* texs[4][2];
+	// 백버퍼4개 2개가 한쌍
 	Texture*** texs; // 백버퍼 버퍼A~D가 그리는 도화지
-	Texture*** texiChannel; // Texture* iChannel[4][4]
-	int** bufiChannel; // int bufiChannel[4][4]
+	Texture*** texiChannel; // Texture* iChannel[5][4]
+	int** bufiChannel; // int bufiChannel[5][4]
 	bool toggle;
 
 	float iTime;

@@ -369,12 +369,7 @@ Texture* createImageWithRGBA(uint8* rgba, int width, int height)
 	glGenTextures(1, &texID);
 	glBindTexture(GL_TEXTURE_2D, texID);
 
-	// 안티 알리아싱
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);// GL_REPEAT
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	// 색상 그라데이션
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// GL_LINEAR
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//GL_NEAREST
+	applyImage();
 
 	int pw = nextPot(width), ph = nextPot(height);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pw, ph,
@@ -475,6 +470,58 @@ void imageFilterMirror(uint8* bgra, int width, int height, int stride)
 			//c[2] = grey; // red
 		}
 	}
+}
+
+static TextureWrap wrap = TextureWrapClamp;
+static TextureFilter filter = TextureFilterLinear;
+
+void setImage(TextureWrap w, TextureFilter f)
+{
+	wrap = w;
+	filter = f;
+}
+
+void applyImage()
+{
+	if (wrap == TextureWrapClamp)
+	{
+		// 안티 알리아싱
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);// GL_REPEAT
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	}
+	else
+	{
+		// 안티 알리아싱
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);// GL_REPEAT
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
+	if (filter == TextureFilterLinear)
+	{
+		// 색상 그라데이션
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// GL_LINEAR
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//GL_NEAREST
+	}
+	else
+	{
+		// 색상 그라데이션
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);// GL_LINEAR
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//GL_NEAREST
+	}
+
+}
+
+void setImage(Texture* tex, TextureWrap w, TextureFilter f)
+{
+	TextureWrap _w = wrap;
+	TextureFilter _f = filter;
+	setImage(w, f);
+
+	glBindTexture(GL_TEXTURE_2D, tex->texID);
+	applyImage();
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	setImage(_w, _f);
 }
 
 Texture* createImage(const char* szFormat, ...)
