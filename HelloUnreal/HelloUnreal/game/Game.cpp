@@ -14,6 +14,8 @@
 #include "4Myun.h"
 #include "Lemon.h"
 
+#include "DT.h"
+
 ParticleSystem** _ps;
 ParticleSystem* ps;
 iPoint psPos;
@@ -64,24 +66,28 @@ void loadGame()
 	loadImageText();
 
 	METHOD_VOID mLoad[] = {
+		loadDT,
 		loadLemon,
 		load4Myun, loadVN, loadComp, loadOops, loadAnimating,
 		loadLotto, loadTripple, loadAirShootng, loadMemory
 	};
 
 	METHOD_VOID mFree[] = {
+		freeDT,
 		freeLemon,
 		free4Myun, freeVN, freeComp, freeOops, freeAnimating,
 		freeLotto, freeTripple, freeAirShootng, freeMemory
 	};
 
 	METHOD_FLOAT mDraw[] = {
+		drawDT,
 		drawLemon,
 		draw4Myun, drawVN, drawComp, drawOops, drawAnimating,
 		drawLotto, drawTripple, drawAirShootng, drawMemory
 	};
 
 	METHOD_KEY mKey[] = {
+		keyDT,
 		keyLemon,
 		key4Myun, keyVN, keyComp, keyOops, keyAnimating,
 		keyLotto, keyTripple, keyAirShootng, keyMemory
@@ -148,7 +154,7 @@ void loadGame()
 
 	Texture* texVCR = createImage("assets/shader/noise.png");
 
-	STInfo stInfo[4] = {
+	STInfo stInfo[5] = {
 		{
 			"assets/shader/gdi.vert",
 			{
@@ -245,9 +251,33 @@ void loadGame()
 				{ -1, -1, -1, -1 },// Image
 			}
 		},
+		{
+			"assets/shader/gdi.vert",
+			{
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				"assets/shader/vcrThunder.frag"
+			},
+			{
+				{ NULL, NULL, NULL, NULL },// buffer A
+				{ },// buffer B
+				{ },// buffer C
+				{ },// buffer D
+				{ texGame, NULL, NULL, NULL},// Image
+			},
+			{
+				{ -1, -1, -1, -1 },// buffer A
+				{ -1, -1, -1, -1 },// buffer B
+				{ -1, -1, -1, -1 },// buffer C
+				{ -1, -1, -1, -1 },// buffer D
+				{ -1, -1, -1, -1 },// Image
+			}
+		},
 	};
-	shadertoy = new iShadertoy * [4];
-	for (int i = 0; i < 4; i++)
+	shadertoy = new iShadertoy * [5];
+	for (int i = 0; i < 5; i++)
 		shadertoy[i] = new iShadertoy(&stInfo[i]);
 	indexShadertoy = -1;
 }
@@ -272,7 +302,7 @@ void freeGame()
 
 	freeImage(texGame);
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 5; i++)
 		delete shadertoy[i];
 	delete shadertoy;
 }
@@ -303,9 +333,9 @@ void drawGame(float dt)
 	else
 		shadertoy[indexShadertoy]->paint(dt);
 
-	drawImage(texGame, devSize.width - 10, devSize.height - 10,
-		0, 0, texGame->width, texGame->height,
-		0.25f, 0.25f, 2, 0, BOTTOM | RIGHT, REVERSE_HEIGHT);
+	//drawImage(texGame, devSize.width - 10, devSize.height - 10,
+	//	0, 0, texGame->width, texGame->height,
+	//	0.25f, 0.25f, 2, 0, BOTTOM | RIGHT, REVERSE_HEIGHT);
 	
 	// 원래대로
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -313,7 +343,7 @@ void drawGame(float dt)
 	if (keydown & keydown_space)
 	{
 		indexShadertoy++;
-		if (indexShadertoy == 4)
+		if (indexShadertoy == 5)
 			indexShadertoy = -1;
 	}
 }
