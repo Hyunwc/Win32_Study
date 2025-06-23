@@ -244,6 +244,8 @@ void iShadertoy::paint(float dt)
 	}
 
 	toggle = !toggle;
+
+	glEnable(GL_BLEND);
 }
 
 void iShadertoy::key(iKeyStat stat, iPoint point)

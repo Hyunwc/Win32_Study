@@ -164,7 +164,7 @@ void setMakeCurrent(bool enable)
 
 iFBO* fbo;
 
-Texture* iFBO::createImage(int width, int height)
+Texture* iFBO::createImage(int width, int height, bool rgba32f)
 {
 	uint32 texID;
 	glGenTextures(1, &texID);
@@ -172,7 +172,7 @@ Texture* iFBO::createImage(int width, int height)
 
 	applyImage();
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height,
+	glTexImage2D(GL_TEXTURE_2D, 0, rgba32f ? GL_RGBA32F : GL_RGBA, width, height,
 		0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
