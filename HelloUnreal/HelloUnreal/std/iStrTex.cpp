@@ -70,6 +70,7 @@ void iStrTex::set(const char* szFormat, ...)
 		else
 		{
 			glDeleteTextures(1, &tex->texID);
+			t->retainCount = tex->retainCount;
 			memcpy(tex, t, sizeof(Texture));
 			delete t;
 		}
