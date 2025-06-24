@@ -18,3 +18,8 @@ struct LoginBar
 	void show(bool s);
 	void paint(float dt, iPoint position);
 };
+
+typedef void (*cbDtLogin)(int result);
+void dtLogin(cbDtLogin func, const char* name, const char* pw, int n);
+
+#define DISPLAY_THREAD 0

@@ -29,7 +29,7 @@ float iFPS::update()
 {
     // 델타타임
     DWORD now = GetTickCount64(); // 현재 시간
-    float delta = (now - lastUpdate) / 1000.0f; // 현재 시간 - 이전시간
+    delta = (now - lastUpdate) / 1000.0f; // 현재 시간 - 이전시간
     lastUpdate = now;
 
     count++;

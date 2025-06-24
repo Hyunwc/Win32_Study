@@ -154,7 +154,7 @@ void loadGame()
 
 	Texture* texVCR = createImage("assets/shader/noise.png");
 
-	STInfo stInfo[5] = {
+	STInfo stInfo[6] = {
 		{
 			"assets/shader/gdi.vert",
 			{
@@ -275,9 +275,33 @@ void loadGame()
 				{ -1, -1, -1, -1 },// Image
 			}
 		},
+		{
+			"assets/shader/gdi.vert",
+			{
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				"assets/shader/vcrFire.frag"
+			},
+			{
+				{ NULL, NULL, NULL, NULL },// buffer A
+				{ },// buffer B
+				{ },// buffer C
+				{ },// buffer D
+				{ texGame, NULL, NULL, NULL},// Image
+			},
+			{
+				{ -1, -1, -1, -1 },// buffer A
+				{ -1, -1, -1, -1 },// buffer B
+				{ -1, -1, -1, -1 },// buffer C
+				{ -1, -1, -1, -1 },// buffer D
+				{ -1, -1, -1, -1 },// Image
+			}
+		},
 	};
-	shadertoy = new iShadertoy * [5];
-	for (int i = 0; i < 5; i++)
+	shadertoy = new iShadertoy * [6];
+	for (int i = 0; i < 6; i++)
 		shadertoy[i] = new iShadertoy(&stInfo[i]);
 	indexShadertoy = -1;
 }
@@ -302,7 +326,7 @@ void freeGame()
 
 	freeImage(texGame);
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 		delete shadertoy[i];
 	delete shadertoy;
 }

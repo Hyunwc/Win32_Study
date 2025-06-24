@@ -4,6 +4,9 @@ int keydown, keystat;      // 00000000 00000000 00000000 00000011
 iSize devSize;
 iRect viewport;
 
+DelayPoint* delayPoint = NULL;
+int delayNum = 0;
+
 ULONG_PTR           gdiplusToken;
 
 static float _r, _g, _b, _a;
@@ -25,6 +28,9 @@ void loadApp(HWND hWnd, METHOD_VOID load, METHOD_VOID free,
 	devSize = iSizeMake(DEV_WIDTH, DEV_HEIGHT);
 	viewport = iRectMake(0, 0, 1, 1);
 
+	delayPoint = new DelayPoint[1000];
+	delayNum = 0;
+
 	loadOpenGL(hWnd);
 
 	_r = 1.0f;
@@ -42,6 +48,7 @@ void loadApp(HWND hWnd, METHOD_VOID load, METHOD_VOID free,
 
 void freeApp()
 {
+	delete delayPoint;
 	methodFree();
 
 	freeOpenGL();
@@ -64,6 +71,15 @@ void drawApp(float dt)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
+	if (delayNum)
+	{
+		DelayPoint* dp = &delayPoint[0];
+		keyApp(dp->s, dp->p);
+
+		delayNum--;
+		memcpy(delayPoint, &delayPoint[1], sizeof(DelayPoint) * delayNum);
+	}
+	
 	methodDraw(dt);
 	fbo->unbind();
 
@@ -207,8 +223,8 @@ void drawLine(float x0, float y0, float x1, float y1)
 	//x1 = viewport.origin.x + x1 * r;
 	//x1 = devSize.height - y1;
 	//x1 = viewport.origin.y + y1 * r;
-	glUniform2f(glGetUniformLocation(programID, "u_start"), x0, y0);
-	glUniform2f(glGetUniformLocation(programID, "u_end"), x1, y1);
+	glUniform2f(glGetUniformLocation(programID, "u_start"), x0, devSize.height - y0);
+	glUniform2f(glGetUniformLocation(programID, "u_end"), x1, devSize.height - y1);
 	glUniform1f(glGetUniformLocation(programID, "u_width"), lineWidth);
 	glUniform4f(glGetUniformLocation(programID, "u_color"), _r, _g, _b, _a);
 
@@ -288,7 +304,7 @@ void fillRect(float x, float y, float width, float height, float radius)
 	// x, y, width, height in 640 x 480
 	//float r = viewport.size.width / devSize.width;
 	//x = viewport.origin.x + x * r;
-	//y = devSize.height - y;
+	y = devSize.height - y;
 	//y = viewport.origin.y + y * r;
 	//width *= r;
 	//height *= r;
@@ -611,7 +627,7 @@ void freeImage(Texture* tex)
 }
 
 void drawImage(Texture* tex, float x, float y, int anc)
-{
+{ 
 	drawImage(tex, x, y, 0, 0, tex->width, tex->height, 1.0f, 1.0f,
 		2, 0, anc);
 }

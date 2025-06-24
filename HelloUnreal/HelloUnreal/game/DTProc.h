@@ -7,4 +7,17 @@ void freeDTProc();
 void drawDTProc(float dt);
 void keyDTProc(iKeyStat stat, iPoint point);
 
+// =======================================
+// DTField
+// =======================================
+#define FieldWidth 1280
+#define FieldHeight 960
+extern iPoint offField;
+
+void loadDTField();
+void freeDTField();
+void drawDTField(float dt);
+void keyDTField(iKeyStat stat, iPoint point);
+
+
 

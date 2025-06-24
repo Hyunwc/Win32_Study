@@ -9,6 +9,9 @@ int selectedLoginBtn;
 
 LoginBar* lb;
 
+int* progress;
+#define maxProgress 50000
+
 void loadDTLogin()
 {
 	printf("LoadDTLogin()");
@@ -48,12 +51,13 @@ void loadDTLogin()
 		}
 
 		img->position = iPointMake((devSize.width - size.width) / 2,
-			devSize.height * 0.3 + (size.height + 20) * i);
+									devSize.height * 0.3 + (size.height + 20) * i);
 		imgLoginBtn[i] = img;
 	}
 	selectedLoginBtn = -1;
 
 	lb = new LoginBar();
+	progress = new int[10];
 }
 
 void freeDTLogin()
@@ -90,10 +94,17 @@ void drawDTLogin(float dt)
 		loginSuccess = false;
 		setLoading(DTStateProc, freeDTLogin, loadDTProc);
 	}
-}
 
-typedef void (*cbDtLogin)(int result); 
-void dtLogin(cbDtLogin func, const char* name, const char* pw);
+#if DISPLAY_THREAD
+	setRGBA(1, 0, 0, 1);
+	for (int i = 0; i < 10; i++)
+	{
+		float r = (float)progress[i] / maxProgress;
+		fillRect(10, 10 + 20 * i, (devSize.width - 20) * r, 10);
+	}
+	setRGBA(1, 1, 1, 1);
+#endif
+}
 
 void resultDtLogin(int result)
 {
@@ -130,9 +141,28 @@ void keyDTLogin(iKeyStat stat, iPoint point)
 		if (selectedLoginBtn == 0)
 		{
 			printf("접속하기\n");
-			dtLogin(resultDtLogin, "김태현", "바보");
-			dtLogin(resultDtLogin, "언리얼", "천재");
+#if DISPLAY_THREAD
+			const char* str[10][2] =
+			{
+				{"김태현", "천재"},
+				{"언리얼", "바보"},
+				{"유니티", "바보"},
+				{"홍유성", "바보"},
+				{"가나디", "바보"},
+				{"김동우", "바보"},
+				{"장지훈", "바보"},
+				{"고민철", "바보"},
+				{"김재학", "바보"},
+
+				{"윤근용", "바보"},
+			};
+			for(int i = 0; i < 10; i++)
+				dtLogin(resultDtLogin, str[i][0], str[i][1], i);
+
 			lb->show(true);
+#else
+			loginSuccess = true;
+#endif
 		}
 		else if (selectedLoginBtn == 1)
 		{
@@ -202,13 +232,16 @@ struct IDPW
 	char* id;
 	char* pw;
 	cbDtLogin m;
+	int n;
 };
 
 // 메인스레드가 아닌 서브스레드
 unsigned __stdcall run(void* parm)
 {
 	IDPW* idpw = (IDPW*)parm;
-	for (int i = 0; i < 5000; i++)
+	//for (int i = 0; i < maxProgress; i++)
+	int& i = progress[idpw->n];
+	for (i = 0; i < maxProgress; i++)
 		printf("%s,%s,%d\n", idpw->id, idpw->pw, i);
 
 	printf("%s,%s the end\n", idpw->id, idpw->pw);
@@ -221,12 +254,13 @@ unsigned __stdcall run(void* parm)
 	return 0;
 }
 
-void dtLogin(cbDtLogin func, const char* name, const char* pw)
+void dtLogin(cbDtLogin func, const char* name, const char* pw, int n)
 {
 	IDPW* idpw = new IDPW;
 	idpw->id = iString::copy(name);
 	idpw->pw = iString::copy(pw);
 	idpw->m = func;
+	idpw->n = n;
 
 	uint32 id;
 	_beginthreadex(NULL, 0, run, (void*)idpw, 0, &id);
