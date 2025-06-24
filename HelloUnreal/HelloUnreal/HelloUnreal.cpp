@@ -99,6 +99,8 @@ void ctrlKey(bool pressed, int& keydown, int key)
     }
 }
 
+
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -133,17 +135,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_LBUTTONDOWN:
         //printf("WM_LBUTTONDOWN %d (%d, %d)\n", wParam, LOWORD(lParam), HIWORD(lParam));
+#if 0
         keyApp(iKeyStatBegan, convertCoord(LOWORD(lParam), HIWORD(lParam)));
+#else
+        // 키 값을 넣어놓음
+        delayPoint[delayNum].s = iKeyStatBegan;
+        delayPoint[delayNum].p = convertCoord(LOWORD(lParam), HIWORD(lParam));
+        delayNum++;
+#endif
         mouseMoving = true;
         break;
     case WM_LBUTTONUP:
         //printf("WM_LBUTTONDOWN %d (%d, %d)\n", wParam, LOWORD(lParam), HIWORD(lParam));
+#if 0
         keyApp(iKeyStatEnded, convertCoord(LOWORD(lParam), HIWORD(lParam)));
+#else
+        // 키 값을 넣어놓음
+        delayPoint[delayNum].s = iKeyStatEnded;
+        delayPoint[delayNum].p = convertCoord(LOWORD(lParam), HIWORD(lParam));
+        delayNum++;
+#endif
         mouseMoving = false;
         break;
     case WM_MOUSEMOVE:
         //if(mouseMoving)
+#if 0
         keyApp(iKeyStatMoved, convertCoord(LOWORD(lParam), HIWORD(lParam)));
+#else
+        // 키 값을 넣어놓음
+        delayPoint[delayNum].s = iKeyStatMoved;
+        delayPoint[delayNum].p = convertCoord(LOWORD(lParam), HIWORD(lParam));
+        delayNum++;
+#endif
         break;
     case WM_MOVE:
         //printf("WM_MOVE\n");
