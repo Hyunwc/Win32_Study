@@ -1,11 +1,7 @@
 #include "iStd.h"
 
-int keydown, keystat;      // 00000000 00000000 00000000 00000011 
 iSize devSize;
 iRect viewport;
-
-DelayPoint* delayPoint = NULL;
-int delayNum = 0;
 
 ULONG_PTR           gdiplusToken;
 
@@ -23,13 +19,12 @@ void loadApp(HWND hWnd, METHOD_VOID load, METHOD_VOID free,
 	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	// back buffer
-	keydown = keydown_none;
-	keystat = keydown_none;
+	iQueueKeySet(1000, keyApp);
+	iKeyboardSet();
 	devSize = iSizeMake(DEV_WIDTH, DEV_HEIGHT);
 	viewport = iRectMake(0, 0, 1, 1);
 
-	delayPoint = new DelayPoint[1000];
-	delayNum = 0;
+	//iQueueKey::getInstance()->set(1000, keyApp);
 
 	loadOpenGL(hWnd);
 
@@ -48,7 +43,8 @@ void loadApp(HWND hWnd, METHOD_VOID load, METHOD_VOID free,
 
 void freeApp()
 {
-	delete delayPoint;
+	delete iQueueKey::getInstance(); // 싱글톤 객체 파괴
+
 	methodFree();
 
 	freeOpenGL();
@@ -71,15 +67,9 @@ void drawApp(float dt)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	if (delayNum)
-	{
-		DelayPoint* dp = &delayPoint[0];
-		keyApp(dp->s, dp->p);
+	//iQueueKey::getInstance()->update(dt);
+	iQueueKeyUpdate(dt);
 
-		delayNum--;
-		memcpy(delayPoint, &delayPoint[1], sizeof(DelayPoint) * delayNum);
-	}
-	
 	methodDraw(dt);
 	fbo->unbind();
 
