@@ -53,7 +53,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         else
         {
             drawApp(iFPS::instance()->update());
-            keydown = keydown_none;
+            iKeyboard::getInstance()->update(iFPS::instance()->delta);
+            //keydown = keydown_none;
         }
     }
 
@@ -65,41 +66,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 #include <stdio.h>
 
 bool mouseMoving = false;
-
-void ctrlKey(bool pressed, int& keydown, int key)
-{
-    int keys[][2] = {
-        // 키를 추가 시키고싶다면 여기다 추가만 하면됨
-        {87, keydown_w}, {65, keydown_a}, {83, keydown_s}, {68, keydown_d},
-        {32, keydown_space},
-    };
-    int nKey = sizeof(keys) / sizeof(int) / 2;
-
-    if (pressed)
-    {
-        for (int i = 0; i < nKey; i++)
-        {
-            if (key == keys[i][0])
-            {
-                keydown |= keys[i][1];
-                break;
-            }
-        }
-    }
-    else
-    {
-        for (int i = 0; i < nKey; i++)
-        {
-            if (key == keys[i][0])
-            {
-                keydown &= ~keys[i][1];
-                break;
-            }
-        }
-    }
-}
-
-
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -125,12 +91,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_KEYDOWN:
         printf("WM_KEYDOWN %d\n", wParam);
-        ctrlKey(true, keystat, wParam);
-        ctrlKey(true, keydown, wParam);
+        iKeyboardAdd(true, wParam);
         break;
     case WM_KEYUP:
         printf("WM_KEYUP %d\n", wParam);
-        ctrlKey(false, keystat, wParam);
+        iKeyboardAdd(false, wParam);
         break;
 
     case WM_LBUTTONDOWN:
@@ -139,9 +104,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         keyApp(iKeyStatBegan, convertCoord(LOWORD(lParam), HIWORD(lParam)));
 #else
         // 키 값을 넣어놓음
-        delayPoint[delayNum].s = iKeyStatBegan;
-        delayPoint[delayNum].p = convertCoord(LOWORD(lParam), HIWORD(lParam));
-        delayNum++;
+        iQueueKeyAdd(iKeyStatBegan, convertCoord(LOWORD(lParam), HIWORD(lParam)));
+       
 #endif
         mouseMoving = true;
         break;
@@ -151,9 +115,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         keyApp(iKeyStatEnded, convertCoord(LOWORD(lParam), HIWORD(lParam)));
 #else
         // 키 값을 넣어놓음
-        delayPoint[delayNum].s = iKeyStatEnded;
-        delayPoint[delayNum].p = convertCoord(LOWORD(lParam), HIWORD(lParam));
-        delayNum++;
+        iQueueKeyAdd(iKeyStatEnded, convertCoord(LOWORD(lParam), HIWORD(lParam)));
 #endif
         mouseMoving = false;
         break;
@@ -163,9 +125,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         keyApp(iKeyStatMoved, convertCoord(LOWORD(lParam), HIWORD(lParam)));
 #else
         // 키 값을 넣어놓음
-        delayPoint[delayNum].s = iKeyStatMoved;
-        delayPoint[delayNum].p = convertCoord(LOWORD(lParam), HIWORD(lParam));
-        delayNum++;
+        iQueueKeyAdd(iKeyStatMoved, convertCoord(LOWORD(lParam), HIWORD(lParam)));
+
 #endif
         break;
     case WM_MOVE:

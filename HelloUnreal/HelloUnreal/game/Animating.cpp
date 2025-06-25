@@ -93,11 +93,11 @@ void drawAnimating(float dt)
 	if (ai->behave != BehaveRepair)
 	{
 		iPoint v = iPointZero;
-		if (keystat & keydown_a)		v.x -= 1;
-		else if (keystat & keydown_d)	v.x += 1;
+		if (iKeyboardStat(keydown_a))		v.x -= 1;
+		else if (iKeyboardStat(keydown_d))	v.x += 1;
 
-		if (keystat & keydown_w)		v.y -= 1;
-		else if (keystat & keydown_s)	v.y += 1;
+		if (iKeyboardStat(keydown_w))		v.y -= 1;
+		else if (iKeyboardStat(keydown_s))	v.y += 1;
 
 		Behave be;
 		if (v == iPointZero)
@@ -109,7 +109,7 @@ void drawAnimating(float dt)
 		}
 
 		// 수리
-		if (keydown & keydown_space)
+		if (iKeyboardDown(keydown_space))
 		{
 			be = BehaveRepair;
 		}

@@ -107,7 +107,8 @@ void showPopCaption(bool show, iPoint center, const char* str)
 	{
 		stCaption->set(str);
 		Texture* t = stCaption->tex;
-		iPoint p = center - iPointMake(t->width / 2, t->height / 2);
+		//iPoint p = center - iPointMake(t->width / 2, t->height / 2);
+		iPoint p = center + iPointMake(0, 20);
 		if (p.x < 10)									p.x = 10;
 		else if (p.x + t->width > devSize.width - 10)	p.x = devSize.width - 10 - t->width;
 		if (p.y < 10)									p.y = 10;

@@ -364,7 +364,7 @@ void drawGame(float dt)
 	// 원래대로
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	
-	if (keydown & keydown_space)
+	if (iKeyboardDown(keydown_space))
 	{
 		indexShadertoy++;
 		if (indexShadertoy == 5)
