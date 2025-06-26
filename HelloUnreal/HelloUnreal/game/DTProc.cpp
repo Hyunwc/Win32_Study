@@ -97,6 +97,7 @@ void keyDTField(iKeyStat stat, iPoint point)
 
 	case iKeyStatMoved:
 		if (dragField == false) break;
+		showDTProcUI(false);
 		offField += point - prevField;
 		prevField = point; // 갱신
 		// 최솟값 최댓값 제한
@@ -106,6 +107,9 @@ void keyDTField(iKeyStat stat, iPoint point)
 		else if (offField.y > offMax.y) offField.y = offMax.y;
 		break;
 	case iKeyStatEnded:
+		if (dragField == false) break;
+		showDTProcUI(true);
+
 		dragField = false;
 		break;
 	}

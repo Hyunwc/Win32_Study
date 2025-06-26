@@ -191,6 +191,7 @@ DTUnitMake::DTUnitMake(int index) : DTUnit(index)
 			Texture* tex = g->getTexture();
 			g->clean();
 			img->add(tex);
+			freeImage(tex);
 		}
 		img->position = iPointMake(-s->width / 2, -s->height);
 		img->_aniDt = 0.17f;

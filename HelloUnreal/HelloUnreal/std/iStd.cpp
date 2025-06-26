@@ -1,5 +1,7 @@
 #include "iStd.h"
 
+iSize monitorSize;
+iSize borderSize;
 iSize devSize;
 iRect viewport;
 
@@ -1161,8 +1163,17 @@ bool move(iPoint* cp, const iPoint* tp, const iPoint& mp)
 
 char* loadFile(int& len, const char* szFormat, ...)
 {
+	char szText[512];
+	va_start_end(szFormat, szText);
+
 	FILE* pf = fopen(szFormat, "rb");
-	
+	if (pf == NULL)
+	{
+		len = 0;
+		printf("loadFile fail : %s\n", szText);
+		return NULL;
+	}
+
 	// offset : 이동할 거리, origin : 어떻게 이동할지
 	// 파일 끝으로 이동해서
 	// len에 현재 위치 값을 반환해서 크기 할당

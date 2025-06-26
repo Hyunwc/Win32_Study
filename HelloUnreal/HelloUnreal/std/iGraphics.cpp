@@ -37,6 +37,8 @@ void iGraphics::init(int width, int height)
 
 	bmp = new Bitmap(width, height);
 	g = Graphics::FromImage(bmp);
+
+	clear(g, 0, 0, 0, 0);
 }
 
 Texture* iGraphics::getTexture()
