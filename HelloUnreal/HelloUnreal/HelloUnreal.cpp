@@ -192,6 +192,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         PostQuitMessage(0);
         delete iFPS::instance();
         break;
+    case WM_ERASEBKGND:
+        return 1;
     }
     return DefWindowProc(hWnd, message, wParam, lParam);
 }

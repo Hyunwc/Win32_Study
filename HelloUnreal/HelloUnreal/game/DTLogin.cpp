@@ -15,7 +15,9 @@ int* progress;
 void loadDTLogin()
 {
 	printf("LoadDTLogin()");
-
+#ifdef DEBUG_TEXTURE
+	printf("loadDTLogin::textureNum = %d\n", textureNum);
+#endif
 	iGraphics* g = iGraphics::getInstance();
 
 	const char* strBtn[] = { "접속하기", "문의하기" };
@@ -48,6 +50,7 @@ void loadDTLogin()
 			Texture* tex = g->getTexture();
 			img->add(tex);
 			g->clean();
+			freeImage(tex);
 		}
 
 		img->position = iPointMake((devSize.width - size.width) / 2,
@@ -58,6 +61,9 @@ void loadDTLogin()
 
 	lb = new LoginBar();
 	progress = new int[10];
+#ifdef DEBUG_TEXTURE
+	printf("loadDTLogin::textureNum = %d\n", textureNum);
+#endif
 }
 
 void freeDTLogin()

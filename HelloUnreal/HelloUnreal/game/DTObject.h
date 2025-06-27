@@ -18,6 +18,8 @@ void drawDTObject(float dt, iPoint off);
 bool keyDTObject(iKeyStat stat, iPoint point);
 
 void startMake(int target);
+// 생산완료후 다음 유닛에게 옮기기위함
+void startMove(int unitIndex);
 
 struct DTUnit;
 typedef void (*MethodWorked)(DTUnit* obj);
@@ -61,10 +63,15 @@ enum StateMake
 };
 
 // index : 0 ~ 99
+// delta == 0.0f : 명령 받을 준비
+// delta < _delta : 생산중 & 명령 받을 수 없는
+// delta >= _delta : 생산완료 & 명령 받을 수 없는
 struct DTUnitMake : DTUnit
 {
-	iImage** imgs;
+	iImage** imgs; // img = imgs[sm];
 	StateMake sm;
+
+	bool* slot; // 0~4 재료 담는 곳, 5~9 완료품 담는곳
 
 	DTUnitMake(int index);
 	virtual ~DTUnitMake();
@@ -81,9 +88,29 @@ struct DTUnitMake : DTUnit
 	static void cbWorked9(DTUnit* obj);
 };
 
+struct MakeInfo
+{
+	iSize size;
+	iColor4f color;
+	float delta; // 생산시간
+};
+
+extern MakeInfo mi[5];
+
+enum StateMove
+{
+	StateMoveReady = 0,
+	StateMoveMove,
+	StateMovePick,
+
+	StateMoveMax
+};
+
 // index : 100 ~ 199
 struct DTUnitMove : DTUnit
 {
+	iImage** imgs;
+	StateMove sm;
 	DTUnitMove(int index);
 	virtual ~DTUnitMove();
 
@@ -98,6 +125,8 @@ struct DTUnitMove : DTUnit
 
 	iPoint* tp;
 	int tpNum;
+
+	bool havePD;
 };
 
 // index : 200 ~ 299
@@ -108,5 +137,7 @@ struct DTUnitReqair : DTUnit
 
 	virtual bool start(MethodWorked m) override; // 생산시작을 알려줘
 	virtual void paint(float dt, iPoint position);
+	static void cbWorked(DTUnit* obj);
 };
 
+Texture* createTDObject(const iSize& s, const iColor4f& bs, const iColor4f& cs, const char* szFormat, ...);

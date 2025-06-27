@@ -367,7 +367,7 @@ void drawGame(float dt)
 	if (iKeyboardDown(keydown_space))
 	{
 		indexShadertoy++;
-		if (indexShadertoy == 5)
+		if (indexShadertoy == 6)
 			indexShadertoy = -1;
 	}
 }
