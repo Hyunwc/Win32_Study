@@ -1,5 +1,10 @@
 #include "iStd.h"
 
+#define DEBUG_TEXTURE
+#ifdef DEBUG_TEXTURE
+int textureNum = 0;
+#endif
+
 iSize monitorSize;
 iSize borderSize;
 iSize devSize;
@@ -392,6 +397,9 @@ Texture* createImageWithRGBA(uint8* rgba, int width, int height)
 	tex->potWidth = pw;
 	tex->potHeight = ph;
 	tex->retainCount = 1;
+#ifdef DEBUG_TEXTURE
+	textureNum++;
+#endif
 
 	return tex;
 }
@@ -616,6 +624,9 @@ void freeImage(Texture* tex)
 
 	glDeleteTextures(1, &tex->texID);
 	delete tex;
+#ifdef DEBUG_TEXTURE
+	textureNum--;
+#endif
 }
 
 void drawImage(Texture* tex, float x, float y, int anc)

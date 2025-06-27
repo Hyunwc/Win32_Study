@@ -180,6 +180,8 @@ bool keyDTProcUI(iKeyStat stat, iPoint point)
 		else //if (i == 2)
 		{
 			printf("주문 하기 %d\n", orderNum);
+			startMake(orderNum);
+			orderNum = 0;
 		}
 		break;
 	case iKeyStatMoved:
@@ -234,6 +236,8 @@ void loadProcData()
 		memset(pd->unitMakeTime, 0x00, sizeof(float)*10); // 10개라고 가정
 		saveProcData();
 	}
+	// 갱신
+	pd->playTimeCurr = GetTickCount();
 }
 
 void saveProcData()
