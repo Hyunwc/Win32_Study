@@ -1,4 +1,5 @@
 #include "DTProcUI.h"
+#include "DTCommon.h"
 
 iPopup** popProcUI;
 static iStrTex** stProcUI;
@@ -10,6 +11,7 @@ iImage** imgProcUIBtn;
 
 void loadDTProcUI()
 {
+	
 	loadProcData();
 	float takeTime = (pd->playTimeCurr - pd->playTimeLast) / 1000.0f;
 	// 내가 접속하지 않은 시간 만큼 시뮬레이션
@@ -230,6 +232,8 @@ bool keyDTProcUI(iKeyStat stat, iPoint point)
 		}
 		else //if (i == 4)
 		{
+			playAudio(AudioBtnOk);
+			printf("클릭 사운드\n");
 			printf("주문 하기 %d\n", orderNum);
 			startMake(orderPD, orderNum);
 			orderNum = 0;
@@ -246,7 +250,10 @@ bool keyDTProcUI(iKeyStat stat, iPoint point)
 		}
 
 		if (pop->selected != j)
+		{
+			playAudio(AudioBtnOk);
 			printf("snd btn %s\n", j != -1 ? "버튼음" : "취소음");
+		}
 		pop->selected = j;
 		break;
 	case iKeyStatEnded:
