@@ -12,12 +12,39 @@
 // 진행률 curr / target
 extern int target, curr, complete, broken;
 
+enum Material
+{
+	Stain = 0,
+
+	Bolt,
+	BoltSilver = Bolt,
+	BoltBlack, BoltWhite,
+	BoltkSilverPack, BoltBlackPack, BoltWhitePack,
+
+	Nut,
+	NutSilver = Nut,
+	NutBlack, NutWhite,
+	NutkSilverPack, NutBlackPack, NutWhitePack,
+};
+
+// DTUnitMake
+
+struct DTItem
+{
+	int pd;
+	int path[3];
+	int pathindex, pathNum;
+};
+
+extern DTItem* dtItem;
+extern int dtItemNum;
+
 void loadDTObject();
 void freeDTObject();
 void drawDTObject(float dt, iPoint off);
 bool keyDTObject(iKeyStat stat, iPoint point);
 
-void startMake(int target);
+void startMake(int orderPD, int orderNum);
 // 생산완료후 다음 유닛에게 옮기기위함
 void startMove(int unitIndex);
 
@@ -71,7 +98,8 @@ struct DTUnitMake : DTUnit
 	iImage** imgs; // img = imgs[sm];
 	StateMake sm;
 
-	bool* slot; // 0~4 재료 담는 곳, 5~9 완료품 담는곳
+	DTItem** slotInput, **slotOutput; // 0~4 재료 담는 곳, 5~9 완료품 담는곳
+	int slotInputNum, slotOutputNum;
 
 	DTUnitMake(int index);
 	virtual ~DTUnitMake();

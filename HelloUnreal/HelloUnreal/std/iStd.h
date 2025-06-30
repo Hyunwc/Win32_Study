@@ -12,6 +12,7 @@
 #include "iImage.h"
 #include "iPopup.h"
 #include "iOpenGL.h"
+#include "iOpenAL.h"
 #include "iStrTex.h"
 #include "iQueueKey.h"
 

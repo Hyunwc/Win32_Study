@@ -1,5 +1,6 @@
 #include "DTLogin.h"
 
+#include "DTCommon.h"
 #include "DTLoading.h"
 #include "DTProc.h"
 
@@ -144,6 +145,7 @@ void keyDTLogin(iKeyStat stat, iPoint point)
 	case iKeyStatBegan:
 		if (selectedLoginBtn == -1) break; // 선택된 버튼이없음
 
+		playAudio(AudioBtnOk);
 		if (selectedLoginBtn == 0)
 		{
 			printf("접속하기\n");
@@ -186,7 +188,11 @@ void keyDTLogin(iKeyStat stat, iPoint point)
 			}
 		}
 		if (selectedLoginBtn != j)
+		{
+			if(j != -1)
+				playAudio(AudioBtnClr);
 			printf("sound : 버튼음\n");
+		}
 		selectedLoginBtn = j;
 		break;
 	case iKeyStatEnded:

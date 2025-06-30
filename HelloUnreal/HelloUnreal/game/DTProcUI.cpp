@@ -3,8 +3,9 @@
 iPopup** popProcUI;
 static iStrTex** stProcUI;
 Texture* methodStProcUI(const char* str);
+Texture* methodStOrder(const char* str);
 
-int orderNum;
+int orderPD, orderNum;
 iImage** imgProcUIBtn;
 
 void loadDTProcUI()
@@ -45,18 +46,19 @@ void loadDTProcUI()
 	setStringSize(20);
 	setStringRGBA(0, 0, 1, 1);
 	img = new iImage();
-	st = new iStrTex();
+	st = new iStrTex(methodStOrder);
+	orderPD = 0;
 	orderNum = 0;
-	st->set("%d", orderNum);
+	st->set("%d\n%d", orderPD, orderNum);
 	img->add(st->tex);
-	img->position = iPointMake(devSize.width - 200, 5);
+	img->position = iPointMake(devSize.width - 290 - 150, 5);
 	pop->add(img);
 	stProcUI[2] = st;
 
-	imgProcUIBtn = new iImage * [3];
-	const char* str[3] = { "▲", "▼", "주문" };
-	iSize size[3] = { {30, 30}, {30, 30}, {50, 30} };
-	for (int i = 0; i < 3; i++)
+	imgProcUIBtn = new iImage * [5];
+	const char* str[5] = { "▲", "▼","▲", "▼", "주문" };
+	iSize size[5] = { {30, 30}, {30, 30},{30, 30}, {30,30}, { 50, 30 } };
+	for (int i = 0; i < 5; i++)
 	{
 		img = new iImage();
 
@@ -90,7 +92,7 @@ void loadDTProcUI()
 			freeImage(tex);
 		}
 
-		img->position = iPointMake(devSize.width - 220 + 60 + 35 * i, 5);
+		img->position = iPointMake(devSize.width - 280 + 60 + 35 * i, 5);
 		pop->add(img);
 		imgProcUIBtn[i] = img;
 	}
@@ -110,9 +112,11 @@ void freeDTProcUI()
 		delete popProcUI[i];
 	delete popProcUI;
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 5; i++)
 		delete stProcUI[i];
 	delete stProcUI;
+
+	delete imgProcUIBtn;
 }
 
 Texture* methodStProcUI(const char* str)
@@ -136,6 +140,43 @@ Texture* methodStProcUI(const char* str)
 	return tex;
 }
 
+Texture* methodStOrder(const char* str)
+{
+	int lineNum;
+	char** line = iString::split(lineNum, str);
+	int orderPD = atoi(line[0]);
+	int orderNum = atoi(line[1]);
+	iString::free(line, lineNum);
+
+	iGraphics* g = iGraphics::getInstance();
+
+	iSize size = iSizeMake(200, 35);
+	g->init(size.width, size.height);
+
+	setRGBA(0, 0, 0, 0.8f);
+	g->fillRect(0, 0, size.width, size.height);
+	setRGBA(1, 1, 1, 1);
+
+	setStringSize(20);
+	setStringRGBA(1, 0, 1, 1);
+
+	const char* material[6] = {
+		"bolt-silver-pack",
+		"nut-silver-pack",
+		"bolt-black-pack",
+		"nut-black-pack",
+		"bolt-white-pack",
+		"nut-white-pack",
+	};
+	g->drawString(size.width, size.height / 2, VCENTER | RIGHT, "%s x %d",
+		material[orderPD], orderNum);
+
+	Texture* tex = g->getTexture();
+	g->clean();
+
+	return tex;
+}
+
 #include "DTObject.h" // Curr
 
 void drawDTProcUI(float dt)
@@ -145,9 +186,7 @@ void drawDTProcUI(float dt)
 	stProcUI[1]->set("총 접속 시간 : %.0fs 현재 접속 시간 : %.0fs",
 		pd->playTimeTotal / 1000.0f,
 		(GetTickCount() - pd->playTimeCurr) / 1000.0f);
-	setStringSize(20);
-	setStringRGBA(0, 0, 1, 1);
-	stProcUI[2]->set("%d", orderNum);
+	stProcUI[2]->set("%d\n%d", orderPD, orderNum);
 
 	for(int i = 0; i < 3; i++)
 		imgProcUIBtn[i]->index = (popProcUI[1]->selected == i);
@@ -170,22 +209,34 @@ bool keyDTProcUI(iKeyStat stat, iPoint point)
 		if (i == -1) break;
 
 		if (i == 0)
-			orderNum += 10;
+		{
+			orderPD--;
+			if (orderPD < 0)
+				orderPD = 0;
+		}
 		else if (i == 1)
+		{
+			orderPD++;
+			if (orderPD > 5)
+				orderPD = 5;
+		}
+		else if (i == 2)
+			orderNum += 10;
+		else if (i == 3)
 		{
 			orderNum -= 10;
 			if (orderNum < 0)
 				orderNum = 0;
 		}
-		else //if (i == 2)
+		else //if (i == 4)
 		{
 			printf("주문 하기 %d\n", orderNum);
-			startMake(orderNum);
+			startMake(orderPD, orderNum);
 			orderNum = 0;
 		}
 		break;
 	case iKeyStatMoved:
-		for (i = 0; i < 3; i++)
+		for (i = 0; i < 5; i++)
 		{
 			if (containPoint(point, imgProcUIBtn[i]->touchRect(pop->ep)))
 			{

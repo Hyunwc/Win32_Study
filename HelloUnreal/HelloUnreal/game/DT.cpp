@@ -1,4 +1,5 @@
 #include "DT.h"
+#include "DTCommon.h"
 #include "DTLoading.h"
 #include "DTLogin.h"
 #include "DTProc.h"
@@ -6,12 +7,16 @@
 void loadDT()
 {
 	loadDTLogin();
-
 	ds = DTStateLogin;
+
+	loadAudio();
+	playAudio(2);
 }
 
 void freeDT()
 {
+	freeAudio();
+
 	switch (ds)
 	{
 	case DTStateLogin: freeDTLogin(); break;
