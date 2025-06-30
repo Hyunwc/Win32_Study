@@ -2,6 +2,7 @@
 
 iOpenAL* openal;
 
+// 경로, 반복여부, 볼륨크기
 struct SndInfo
 {
 	const char* path;
@@ -11,7 +12,6 @@ struct SndInfo
 
 void loadAudio()
 {
-	// boolean 값은 반복여부
 	SndInfo si[3] = {
 		{"btn0", false, 1.0f},
 		{"btn1", false, 1.0f},
@@ -41,6 +41,7 @@ void playAudio(int index)
 
 void stopAudio(int index)
 {
+	// 모두 중지
 	if (index == -1)
 	{
 		for (int i = 0; i < openal->bufCount; i++)
@@ -48,13 +49,14 @@ void stopAudio(int index)
 		return;
 	}
 
+	// 해당 인덱스 중지
 	openal->stop(index);
 }
 
 void volumeAudio(float sfx, float bgm)
 {
-	for (int i = 0; i < openal->bufCount; i++)
+	/*for (int i = 0; i < openal->bufCount; i++)
 	{
 
-	}
+	}*/
 }

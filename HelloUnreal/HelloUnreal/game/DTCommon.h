@@ -10,9 +10,9 @@ void volumeAudio(float sfx, float bgm);
 
 enum Audio
 {
-	AudioBtnClr = 0,
-	AudioBtnOk,
-	AudioBGM,
+	AudioBtnClr = 0, // 클릭
+	AudioBtnOk,  
+	AudioBGM, // 배경음악
 
 	AudioMax
 };
