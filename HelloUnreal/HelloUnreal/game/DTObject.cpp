@@ -2,6 +2,9 @@
 
 #include "DTProcPop.h"
 
+DTItem* dtItem;
+int dtItemNum;
+
 DTUnit** unit;
 int unitNum;
 int selectedUnit;
@@ -10,10 +13,45 @@ iPoint positionUnit;
 // 목표 갯수, 현재 만들고 있는, 완료 갯수
 int target, curr, complete, broken;
 
-void startMake(int target)
+void startMake(int orderPD, int orderNum)
 {
-	// 주문 우선 순위 나중에 처리...
-	::target = target; 
+	// 주문 우선 순위 나중에 처리...'
+	int path[6][4] = {
+		{2,   0, 3},
+		{2,   0, 3},
+		{3,   0, 1, 3},
+		{3,   0, 1, 3},
+		{3,   0, 2, 3},
+		{3,   0, 3, 3},
+	};
+	int num;
+	if (orderPD % 2 == 0) num = 3; // bolt
+	else				  num = 4; // nut
+	num = orderNum / num + (orderNum % num ? 1 : 0);
+
+	for (int i = 0; i < num; i++)
+	{
+		DTItem* it = &dtItem[dtItemNum + i];
+		it->pd = orderPD;
+		memcpy(it->path, &path[orderPD][1], sizeof(int) *
+			path[orderPD][0]);
+		it->pathNum = path[orderPD][0];
+		it->pathindex = 0;
+
+		DTUnitMake* u = (DTUnitMake*)unit[0];
+		for (int j = 0; j < u->slotInputNum; j++)
+		{
+			if (u->slotInput[j] == NULL)
+			{
+				u->slotInput[j] = it;
+				break;
+			}
+		}
+	}
+
+	dtItemNum += num;
+
+	target = orderNum; 
 	curr = 0;
 	complete = 0;
 	broken = 0;
@@ -240,8 +278,20 @@ DTUnitMake::DTUnitMake(int index) : DTUnit(index)
 	
 	sm = StateMakeReady;
 
-	slot = new bool[10];
-	memset(slot, false, sizeof(bool) * 10);
+	int slotNum[4][2] = {
+		{3, 20}, // DTItem의 재료저장 슬롯개수, 생산저장 슬롯개수
+		{10, 10},
+		{10, 10},
+		{10, 2},
+	};
+
+	slotInputNum = slotNum[index][0];
+	slotOutputNum = slotNum[index][1];
+
+	slotInput = new DTItem*[10];
+	memset(slotInput, NULL, sizeof(DTItem) * 10);
+	slotOutput = new DTItem * [10];
+	memset(slotOutput, NULL, sizeof(DTItem) * 10);
 
 	_delta = m->delta;
 }
@@ -253,7 +303,8 @@ DTUnitMake::~DTUnitMake()
 	delete imgs;
 	img = NULL; // 부모 멤버는 해제하면안됨
 
-	delete slot;
+	delete slotInput;
+	delete slotOutput;
 }
 
 bool DTUnitMake::start(MethodWorked m)
@@ -278,12 +329,12 @@ void DTUnitMake::paint(float dt, iPoint position)
 	// 현재위치 + 스크롤값
 	img->paint(dt, this->position + position);
 
-	
 	// ctrl
 
 	// 물건 싣는중...
 	float r = run(dt);
 
+	// 진행 상태를 나타내는 프로그레스바
 	if (r) // 생산이 완료가 되더라도 디스플레이
 	{
 		iPoint p = iPointMake(img->position.x, 0) +
@@ -485,14 +536,14 @@ void DTUnitMove::cbWorked(DTUnit* obj)
 		//u->start(DTUnitMake::cbWorked1);
 		DTUnitMake* u = (DTUnitMake*)unit[index];
 
-		for (int i = 0; i < 10; i++)
-		{
-			if (u->slot[i] == false)
-			{
-				u->slot[i] = true;
-				break;
-			}
-		}
+		//for (int i = 0; i < 10; i++)
+		//{
+		//	if (u->slot[i] == false)
+		//	{
+		//		u->slot[i] = true;
+		//		break;
+		//	}
+		//}
 	}
 
 }
