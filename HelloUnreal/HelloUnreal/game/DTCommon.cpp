@@ -1,5 +1,12 @@
 #include "DTCommon.h"
 
+#if 1
+void loadAudio() {}
+void freeAudio() {}
+void playAudio(int index) {}
+void stopAudio(int index) {}
+void volumeAudio(float sfx, float bgm) {}
+#else
 iOpenAL* openal;
 
 // 경로, 반복여부, 볼륨크기
@@ -60,3 +67,5 @@ void volumeAudio(float sfx, float bgm)
 
 	}*/
 }
+
+#endif

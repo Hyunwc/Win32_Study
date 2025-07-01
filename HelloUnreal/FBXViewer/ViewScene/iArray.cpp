@@ -1,10 +1,9 @@
 #include "iArray.h"
 
-
 iArray::iArray(MethodArray method)
 {
-	tail = NULL;
-	head = NULL;
+	tail = 0;
+	head = 0;
 	count = 0;
 	this->method = method;
 }
@@ -144,7 +143,7 @@ void* iArray::at(int index)
 		}
 	}
 	// 여기까지 오면 못찾은 것이므로 NULL 반환
-	return NULL;
+	return 0;
 }
 
 void iArray::removeAll()
@@ -158,16 +157,19 @@ void iArray::removeAll()
 		delete n;
 		n = t; 
 	}
-	tail = NULL;
+	tail = 0;
 	count = 0;
 }
 
 void iArray::remove(int index)
 {
-	Node* prevN = NULL;
+	Node* prevN = 0;
 	Node* n = tail;
 	for (int i = count - 1; i > -1; i--)
 	{
+		// i 0일때
+		// i count -1 일때
+		// 그 외
 		if (i == index)
 		{
 			if (prevN)
@@ -178,7 +180,6 @@ void iArray::remove(int index)
 			if (method)
 				method(n->data);
 			delete n;
-
 			count--;
 			return;
 		}

@@ -17,8 +17,6 @@ iStrTex*** stMenuBtn; // 여러개의 메뉴가 있으니 삼중
 Texture* methodStBtn(const char* s);
 int selectedMenu;
 
-
-
 void loadLemonMenu()
 {
 	stExp = new iStrTex(methodStExp);
@@ -199,10 +197,10 @@ void keyLemonMenu(iKeyStat stat, iPoint point)
 		else
 		{
 			printf("game start!\n");
-			setMakeCurrent(true);
+			//setMakeCurrent(true);
 			freeLemonMenu();
 			loadLemonProc();
-			setMakeCurrent(false);
+			//setMakeCurrent(false);
 			gameState = GameStateProc;
 		}
 		break;

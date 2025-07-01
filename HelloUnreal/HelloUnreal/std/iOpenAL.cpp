@@ -13,6 +13,8 @@ iOpenAL::iOpenAL(int count)
 	};
 	
 	ALCcontext* newContext = alcCreateContext(newDevice, attr);
+	if (newContext == NULL)
+		return;
 
 	alcMakeContextCurrent(newContext);
 
@@ -41,12 +43,13 @@ iOpenAL::iOpenAL(int count)
 
 iOpenAL::~iOpenAL()
 {
-	ALCuint* returnNames = new ALCuint[bufCount];
+	//ALCuint* returnNames = new ALCuint[bufCount];
+	//alDeleteBuffers(bufCount, returnNames);
+	//alDeleteSources(bufCount, returnNames);
+	//delete returnNames;
 
-	alDeleteSources(bufCount, returnNames);
-	alDeleteBuffers(bufCount, returnNames);
-
-	delete returnNames;
+	alDeleteBuffers(bufCount, gBuffer);
+	alDeleteSources(bufCount, gSource);
 
 	ALCcontext* context = alcGetCurrentContext();
 	ALCdevice* device = alcGetContextsDevice(context);

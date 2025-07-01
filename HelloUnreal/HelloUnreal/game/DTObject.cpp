@@ -15,7 +15,7 @@ int target, curr, complete, broken;
 
 void startMake(int orderPD, int orderNum)
 {
-	// 주문 우선 순위 나중에 처리...'
+	// 주문 우선 순위 나중에 처리...
 	int path[6][4] = {
 		{2,   0, 3}, // 실버볼트
 		{2,   0, 3}, // 실버너트
@@ -172,6 +172,7 @@ bool keyDTObject(iKeyStat stat, iPoint point)
 	case iKeyStatEnded:
 		break;
 	}
+
 	return false;
 }
 
@@ -270,6 +271,7 @@ DTUnitMake::DTUnitMake(int index) : DTUnit(index)
 			img->add(tex);
 			freeImage(tex);
 		}
+
 		img->position = iPointMake(-s->width / 2, -s->height);
 		img->_aniDt = 0.17f;
 		img->startAnimation();
@@ -289,9 +291,9 @@ DTUnitMake::DTUnitMake(int index) : DTUnit(index)
 	slotOutputNum = slotNum[index][1];
 
 	slotInput = new DTItem*[10];
-	memset(slotInput, NULL, sizeof(DTItem) * 10);
+	memset(slotInput, NULL, sizeof(DTItem*) * 10);
 	slotOutput = new DTItem * [10];
-	memset(slotOutput, NULL, sizeof(DTItem) * 10);
+	memset(slotOutput, NULL, sizeof(DTItem*) * 10);
 
 	_delta = m->delta;
 }

@@ -45,9 +45,9 @@ void setLoading(DTState dsNext, METHOD_VOID free, METHOD_VOID load)
 		}
 	};
 
-	setMakeCurrent(true);
+	//setMakeCurrent(true);
 	st = new iShadertoy(&stInfo);
-	setMakeCurrent(false);
+	//setMakeCurrent(false);
 }
 
 #define _delta 1.0f
@@ -61,7 +61,7 @@ void drawDTLoading(float dt)
 	if (delta < _delta)
 	{
 		delta += dt;
-		a = delta / _delta;
+		a = clamp(delta / _delta, 0.0f, 1.0f);
 
 		// 점점점점 어두워졌다가
 		if (delta >= _delta)
