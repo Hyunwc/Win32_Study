@@ -114,7 +114,7 @@ void freeDTProcUI()
 		delete popProcUI[i];
 	delete popProcUI;
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 3; i++)
 		delete stProcUI[i];
 	delete stProcUI;
 

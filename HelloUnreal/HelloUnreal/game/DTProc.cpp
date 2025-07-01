@@ -30,6 +30,7 @@ void drawDTProc(float dt)
 	drawDTField(dt);
 	// offField -> 움직인만큼 반영
 	drawDTObject(dt, offField);
+	//return;
 	drawDTProcUI(dt);
 	drawDTProcPop(dt);
 }

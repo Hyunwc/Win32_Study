@@ -74,6 +74,7 @@ void freeDTLogin()
 		delete imgLoginBtn[i];
 	delete imgLoginBtn;
 	delete lb;
+	delete progress;
 }
 
 bool loginSuccess = false;
@@ -119,9 +120,6 @@ void resultDtLogin(int result)
 	{
 		// 성공
 		loginSuccess = true;
-		//setMakeCurrent(true);
-		//setLoading(DTStateLogin, freeDTLogin, loadDTProc);
-		//setMakeCurrent(false);
 		lb->show(false); // 성공이든 실패든 닫아야함
 	}
 	else

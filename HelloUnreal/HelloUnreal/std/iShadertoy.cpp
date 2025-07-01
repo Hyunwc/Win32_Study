@@ -67,7 +67,22 @@ iShadertoy::iShadertoy(STInfo* info)
 		iShader::deleteShader(fragID);
 
 		texiChannel[i] = new Texture * [4];
+#if 1
 		memcpy(texiChannel[i], info->tex[i], sizeof(Texture*) * 4);
+#else
+		for (int j = 0; j < 4; j++)
+		{
+			if (info->tex[i][j])
+			{
+				texiChannel[i][j] = info->tex[i][j];
+				texiChannel[i][j]->retainCount++;
+			}
+			else
+			{
+				texiChannel[i][j] = NULL;
+			}
+		}
+#endif
 		bufiChannel[i] = new int[4];
 		memcpy(bufiChannel[i], info->buf[i], sizeof(int) * 4);
 	}
