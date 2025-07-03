@@ -4,8 +4,13 @@
 #include "DTLogin.h"
 #include "DTProc.h"
 
+#include "NSLib.h"
+#pragma comment(lib, "NSLib.lib")
+
 void loadDT()
 {
+	int result = nsAdd(2, 3);
+	printf("nsAdd = %d\n", result);
 	loadDTLogin();
 	ds = DTStateLogin;
 

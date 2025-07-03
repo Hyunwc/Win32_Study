@@ -190,7 +190,7 @@ void drawDTProcUI(float dt)
 		(GetTickCount() - pd->playTimeCurr) / 1000.0f);
 	stProcUI[2]->set("%d\n%d", orderPD, orderNum);
 
-	for(int i = 0; i < 3; i++)
+	for(int i = 0; i < 5; i++)
 		imgProcUIBtn[i]->index = (popProcUI[1]->selected == i);
 
 	for(int i = 0; i < 2; i++)
@@ -223,17 +223,15 @@ bool keyDTProcUI(iKeyStat stat, iPoint point)
 				orderPD = 5;
 		}
 		else if (i == 2)
-			orderNum += 10;
+			orderNum += 1;
 		else if (i == 3)
 		{
-			orderNum -= 10;
+			orderNum -= 1;
 			if (orderNum < 0)
 				orderNum = 0;
 		}
 		else //if (i == 4)
 		{
-			playAudio(AudioBtnOk);
-			printf("클릭 사운드\n");
 			printf("주문 하기 %d\n", orderNum);
 			startMake(orderPD, orderNum);
 			orderNum = 0;

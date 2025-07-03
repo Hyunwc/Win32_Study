@@ -34,7 +34,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     DWORD dwExStyle, dwStyle;
     setWindowStyle(false, dwExStyle, dwStyle);
 
-
     int x = 0;
     int y = 0;
     int w = monitorSize.width, h = monitorSize.height;

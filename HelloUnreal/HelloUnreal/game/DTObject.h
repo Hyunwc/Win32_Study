@@ -34,21 +34,26 @@ struct DTItem
 	int pd;
 	int path[3];
 	int pathindex, pathNum;
+	// 생산시간
+	DWORD makeStart, makeEnd; 
 };
 
 extern DTItem* dtItem;
 extern int dtItemNum;
+#define dtItemMax 1000
+
+struct DTUnit;
+extern DTUnit** unit;
+extern int unitNum;
 
 void loadDTObject();
 void freeDTObject();
 void drawDTObject(float dt, iPoint off);
 bool keyDTObject(iKeyStat stat, iPoint point);
 
+// DTProcUI에서 쓰기위함
 void startMake(int orderPD, int orderNum);
-// 생산완료후 다음 유닛에게 옮기기위함
-void startMove(int unitIndex);
 
-struct DTUnit;
 typedef void (*MethodWorked)(DTUnit* obj);
 
 struct DTUnit
@@ -63,10 +68,17 @@ struct DTUnit
 	// 파라미터 : offset(스크롤된 값)
 	iRect touchRect(iPoint position);
 
+	// 0~99 : 생산 로봇
+	// 100~199 : 운반 로봇
+	// 200~299 : 수리 로봇
 	int index;
+	// 현재 사용하고 있는 이미지
 	iImage* img;
-	iPoint position; // 로봇의 위치
-	float delta, _delta; // 생산시간
+	// 로봇의 기준(월드) 좌표(img->pos:축좌표)
+	// offMap : 카메라좌표
+	iPoint position; 
+	// 수행시간
+	float delta, _delta; 
 
 	MethodWorked methodWorked;
 };
@@ -98,8 +110,12 @@ struct DTUnitMake : DTUnit
 	iImage** imgs; // img = imgs[sm];
 	StateMake sm;
 
-	DTItem** slotInput, **slotOutput; // 0~4 재료 담는 곳, 5~9 완료품 담는곳
-	int slotInputNum, slotOutputNum;
+	// 재료 담는 곳, 완료품 담는곳
+	DTItem** slotIn, **slotOut; 
+	int slotInNum, slotOutNum;
+	// 재료
+	int makeInNum, makeOutNum; // 들어가는 재료, 만들어진 상품
+	int* makeSlotIn; // 제작에 들어간 슬롯?
 
 	DTUnitMake(int index);
 	virtual ~DTUnitMake();
@@ -107,23 +123,11 @@ struct DTUnitMake : DTUnit
 	virtual bool start(MethodWorked m) override; // 생산시작을 알려줘
 	virtual void paint(float dt, iPoint position);
 	
-	static void cbWorked0(DTUnit* obj);
-	static void cbWorked1(DTUnit* obj);
-	static void cbWorked2(DTUnit* obj);
-	static void cbWorked3(DTUnit* obj);
-	static void cbWorked4(DTUnit* obj);
-	static void cbWorked5(DTUnit* obj);
-	static void cbWorked9(DTUnit* obj);
+	static void cbWorked0(DTUnit* obj); // 볼트,너트
+	static void cbWorked1(DTUnit* obj); // 블랙 도색
+	static void cbWorked2(DTUnit* obj); // 화이트 도색
+	static void cbWorked3(DTUnit* obj); // 포장
 };
-
-struct MakeInfo
-{
-	iSize size;
-	iColor4f color;
-	float delta; // 생산시간
-};
-
-extern MakeInfo mi[5];
 
 enum StateMove
 {
@@ -143,29 +147,80 @@ struct DTUnitMove : DTUnit
 	virtual ~DTUnitMove();
 
 	void setAreaRange(iPoint sp, iPoint ep, float speed);
-	static void cbWorked(DTUnit* obj);
 
 	virtual bool start(MethodWorked m) override; // 생산시작을 알려줘
 	virtual void paint(float dt, iPoint position);
 
+	static void cbWorked(DTUnit* obj);
+
 	iPoint sp, ep;
+	iPoint tPosition;
+	int unitIndex;
 	float speed;
 
-	iPoint* tp;
-	int tpNum;
-
-	bool havePD;
+	// 생산된지 오래된 기준으로 사용할 것
+	DTItem* have;
 };
 
 // index : 200 ~ 299
-struct DTUnitReqair : DTUnit
+struct DTUnitSida : DTUnit
 {
-	DTUnitReqair();
-	virtual ~DTUnitReqair();
+	iImage** imgs;
+	StateMove sm;
+
+	iPoint* path;
+	int pathIndex, pathNum;
+
+	DTUnitSida(int index);
+	virtual ~DTUnitSida();
 
 	virtual bool start(MethodWorked m) override; // 생산시작을 알려줘
 	virtual void paint(float dt, iPoint position);
 	static void cbWorked(DTUnit* obj);
 };
 
+extern iShortestPath* dtsp;
+
+// index : 300 ~ 399
+struct DTUnitSuccess : DTUnit
+{
+	DTUnitSuccess(int index);
+	virtual ~DTUnitSuccess();
+
+	virtual void paint(float dt, iPoint position);
+};
+
+// index : 400 ~ 499
+struct DTUnitFail : DTUnit
+{
+	DTUnitFail(int index);
+	virtual ~DTUnitFail();
+
+	virtual void paint(float dt, iPoint position);
+};
+
 Texture* createTDObject(const iSize& s, const iColor4f& bs, const iColor4f& cs, const char* szFormat, ...);
+
+// ==================================
+// 로봇 이미지 생성
+// ==================================
+iImage** createRobot(
+	int index, int beNum,
+	const char** strBe, int* beAniNum,
+	iSize* s, iColor4f* c,
+	float ss, iColor4f* sc);
+
+// ==================================
+// 로봇 데이터
+// ==================================
+struct RobotInfo
+{
+	iSize size;
+	iColor4f color;
+	float delta; // 생산시간
+};
+
+extern RobotInfo ri[8];
+
+extern int itemPath[6][4];
+extern int slotInOut[4][4];
