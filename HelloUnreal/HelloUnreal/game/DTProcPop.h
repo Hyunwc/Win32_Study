@@ -27,3 +27,14 @@ void showPopCaption(bool show, iPoint center = iPointZero, const char* str = NUL
 // 
 // 창을 닫을 때.. 전달 메시지
 // 
+
+// ========================================
+// popUnit
+// ========================================
+
+void createPopUnit();
+void freePopUnit();
+void drawPopUnit(float dt);
+bool keyPopUnit(iKeyStat stat, iPoint point);
+
+void showPopUnit(bool show, int unitIndex);

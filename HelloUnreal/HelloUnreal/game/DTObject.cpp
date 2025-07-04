@@ -11,19 +11,16 @@ int selectedUnit;
 iPoint positionUnit;
 
 // 목표 갯수, 현재 만들고 있는, 완료 갯수, 고장
-int target, curr, complete, broken;
+int curr, complete, broken;
 
 static iPoint off;
 
-struct OrderInfo
-{
-	int pd;
-	int num;
-};
-
 OrderInfo* oi;
 int oiNum;
-#define oiMax 100
+bool oiComplete;
+
+OrderInfo* oiBk;
+int oiNumBk;
 
 iShortestPath* dtsp;
 
@@ -31,13 +28,14 @@ void startMake(int orderPD, int orderNum)
 {
 	OrderInfo* o = &oi[oiNum];
 	o->pd = orderPD;
-	o->num = orderNum;
+	o->num = orderNum / 5 * 3;
+	o->_num = orderNum;
 	oiNum++;
 
 	if (oiNum == 1)
 	{
-		target = oi[0].num;
 		curr = 0;
+		oiComplete = false;
 	}
 }
 
@@ -55,8 +53,10 @@ void loadDTObject()
 	// make
 	for (int i = 0; i < 4; i++)
 	{
-		unit[i] = new DTUnitMake(i);
-		unit[i]->position = iPointMake(80 + 140 * i, 140 - 30 * i);
+		DTUnit* u = new DTUnitMake(i);
+		unit[i] = u;
+		u->position = iPointMake(80 + 140 * i, 140 - 30 * i);
+		u->positionSida = u->position + iPointMake(-20, 40);
 	}
 	// move
 	DTUnitMove* u = new DTUnitMove(100);
@@ -72,18 +72,19 @@ void loadDTObject()
 	// success
 	unit[6] = new DTUnitSuccess(300);
 	unit[6]->position = iPointMake(80, devSize.height * 0.7f);
+	unit[6]->positionSida = unit[6]->position + iPointMake(-10, -70);
 	// fail
 	for (int i = 0; i < 2; i++)
 	{
 		DTUnit* u = new DTUnitFail(400 + i);
 		u->position = iPointMake(220 + 140 * i, devSize.height * 0.7f);
+		u->positionSida = u->position + iPointMake(-10, -70);
 		unit[7 + i] = u;
 	}
 
 	selectedUnit = -1;
 	positionUnit = iPointZero;
 
-	target = 0;
 	curr = 0;
 	complete = 0;
 	broken = 0;
@@ -92,6 +93,9 @@ void loadDTObject()
 
 	oi = new OrderInfo[oiMax];
 	oiNum = 0;
+
+	oiBk = new OrderInfo[oiMax];
+	oiNumBk = 0;
 
 	dtsp = new iShortestPath();
 }
@@ -105,6 +109,7 @@ void freeDTObject()
 	delete unit;
 
 	delete oi;
+	delete oiBk;
 
 	delete dtsp;
 }
@@ -128,11 +133,15 @@ void drawDTObject(float dt, iPoint off)
 	if (oiNum)
 	{
 		OrderInfo* o = &oi[0];
-		if (o->num == 0)
+		if (o->num == 0 && oiComplete)
 		{
+			oiComplete = false;
+
+			memcpy(&oiBk[oiNumBk], oi, sizeof(OrderInfo));
+			oiNumBk++;
+
 			oiNum--;
 			memcpy(oi, &oi[1], sizeof(OrderInfo) * oiNum);
-			target = oi[0].num;
 			curr = 0;
 			return;
 		}
@@ -198,9 +207,12 @@ bool keyDTObject(iKeyStat stat, iPoint point)
 	switch (stat)
 	{
 	case iKeyStatBegan:
+		i = selectedUnit;
+		if (i == -1) break;
+		showPopUnit(true, i);
 		break;
 	case iKeyStatMoved:
-		for (i = 0; i < unitNum; i++)
+		for (int i = 0; i < unitNum; i++)
 		{
 			if (containPoint(point, unit[i]->touchRect(off)))
 			{
@@ -228,6 +240,9 @@ DTUnit::DTUnit(int index)
 	position = iPointZero;
 	_delta = 0.0f;
 	delta = 0.0f;
+
+	positionSida = iPointZero;
+	exe = 0;
 }
 
 DTUnit::~DTUnit()
@@ -245,6 +260,14 @@ bool DTUnit::start(MethodWorked m)
 	delta = 0.000001f;
 	methodWorked = m;
 	return true;
+}
+
+void DTUnit::displaySida(float dt, iPoint position)
+{
+	setLineWidth(1);
+	setRGBA(1, 1, 1, 1);
+	fillRect(positionSida.x + position.x,
+		positionSida.y + position.y, 5, 5, 2.5f);
 }
 
 float DTUnit::run(float dt)
@@ -347,6 +370,8 @@ void DTUnitMake::paint(float dt, iPoint position)
 	iPoint p = this->position + position;
 	img->paint(dt, p);
 
+	displaySida(dt, position);
+
 	p.x += img->position.x;
 	// 생산재료
 	for (int i = 0; i < slotInNum; i++)
@@ -437,6 +462,8 @@ void DTUnitMake::cbWorked0(DTUnit* obj)
 
 	// 실 데이터를 반영
 	printf("DTUnitMake[0] 생산완료 => UnitMove\n");
+	dm->exe++;
+
 	dm->sm = StateMakeReady;
 
 	// 추가적으로 만들어야 하는 DTItem
@@ -719,6 +746,8 @@ void DTUnitMove::cbWorked(DTUnit* obj)
 				dm->have = NULL;
 
 				dm->sm = StateMoveReady;
+
+				dm->exe++;
 				break;
 			}
 		}
@@ -803,6 +832,11 @@ DTUnitSida::DTUnitSida(int index) : DTUnit(index)
 
 	path = new iPoint[32 * 24];
 	pathNum = 0;
+	pathIndex = 0;
+
+	speed = 200.0f;
+
+	have = NULL;
 }
 
 DTUnitSida::~DTUnitSida()
@@ -821,6 +855,8 @@ bool DTUnitSida::start(MethodWorked m)
 	return false;
 }
 
+#include "DTProc.h"
+
 void DTUnitSida::paint(float dt, iPoint position)
 {
 	img = imgs[sm];
@@ -832,6 +868,185 @@ void DTUnitSida::paint(float dt, iPoint position)
 	for (int i = 0; i < j; i++)
 	{
 		drawLine(path[i] + position, path[i + 1] + position);
+	}
+	// ctrl
+	if (sm == StateMoveReady)
+	{
+		// 불량품 회수
+		DWORD min = 0xffffffff;
+		int selectedMake = -1;
+		//DTItem* item = NULL;
+		for (int i = 0; i < 3; i++)
+		{
+			DTUnitMake* u = (DTUnitMake*)unit[i];
+			for (int j = 0; j < u->slotOutNum; j++)
+			{
+				DTItem* it = u->slotOut[j];
+				if (it == NULL ||
+					it->pd < 100) // 성공품
+					continue;
+
+				if (min > it->makeEnd)
+				{
+					min = it->makeEnd;
+					selectedMake = i;
+				}
+			}
+		}
+
+		if (selectedMake != -1)
+		{
+			dtsp->set(fieldTile, fieldX, fieldY, fieldW, fieldH);
+			dtsp->run(this->position, unit[selectedMake]->positionSida,
+				path, pathNum);
+			pathIndex = 0;
+			targetUnit = selectedMake;
+			sm = StateMoveMove;
+		}
+		// 완제품 회수
+		else
+		{
+			bool exist = false;
+
+			DTUnitMake* u = (DTUnitMake*)unit[3];
+			for (int i = 0; i < u->slotOutNum; i++)
+			{
+				if (u->slotOut[i])
+				{
+					exist = true;
+					break;
+				}
+			}
+
+			if (exist)
+			{
+				dtsp->set(fieldTile, fieldX, fieldY, fieldW, fieldH);
+				dtsp->run(this->position, u->positionSida, path, pathNum);
+				pathIndex = 0;
+				targetUnit = 3;
+				sm = StateMoveMove;
+			}
+		}
+	}
+	
+	if (pathIndex < pathNum)
+	{
+		iPoint tPosition = path[pathIndex];
+		iPoint mp = tPosition - this->position;
+		mp.loadIdentity();
+		mp = mp * (speed * dt);
+		if (move(&this->position, &tPosition, mp))
+		{
+			pathIndex++;
+			if (pathIndex == pathNum)
+			{
+				printf("arrive sida\n");
+				if (have == NULL)
+				{
+					DWORD min = 0xffffffff;
+					DTItem* item = NULL;
+
+					DTUnitMake* u = (DTUnitMake*)unit[targetUnit];
+					for (int i = 0; i < u->slotOutNum; i++)
+					{
+						//if (u->slotOut[i])
+						//	have = u->slotOut[i];
+						DTItem* it = u->slotOut[i];
+						if (it == NULL)
+							continue;
+						if(targetUnit < 3) // 불량품
+						{
+							if (it->pd < 100)
+								continue;
+						}
+						else if (targetUnit == 3) // 정상품
+						{
+							// 불량품 만들지 않았으니...
+						}
+							
+						if (min > it->makeEnd)
+						{
+							min = it->makeEnd;
+							item = it;
+						}
+					}
+
+					have = item;
+					//item = NULL;
+					for (int i = 0; i < u->slotOutNum; i++)
+					{
+						if (u->slotOut[i] == item)
+						{
+							u->slotOut[i] = NULL;
+							break;
+						}
+					}
+
+					// 정상품
+					if (item->pd < 100)
+					{
+						// 6번으로
+						targetUnit = 6;
+					}
+					// 불량품
+					else
+					{
+						// 7, 8번으로
+						int pd = item->pd % 100;
+						if(targetUnit == 0)
+							targetUnit = 7;
+						else
+							targetUnit = 8;
+					}
+					dtsp->set(fieldTile, fieldX, fieldY, fieldW, fieldH);
+					dtsp->run(this->position, unit[targetUnit]->positionSida, path, pathNum);
+					pathIndex = 0;
+					sm = StateMoveMove;
+				}
+				else //if (have)
+				{
+					if (targetUnit == 6)
+					{
+						DTUnitSuccess* u = (DTUnitSuccess*)unit[6];
+						for (int i = 0; i < u->_haveNum; i++)
+						{
+							if (u->have[i] == NULL)
+							{
+								u->have[i] = have;
+								u->haveNum++;
+								curr--;
+								complete++;
+								break;
+							}
+						}
+						have = NULL;
+						
+						if (u->haveNum == oi[0]._num)
+						{
+							// 출고처리
+							printf("출고처리!! %d\n", oi[0]._num);
+							oiComplete = true;
+							u->haveNum = 0;
+							u->exe++;
+						}
+					}
+					else //if (targetUnit == 7 || targetUnit == 8)
+					{
+						// 폐기 처리
+						printf("폐기처리!!\n");
+						curr--;
+						broken++;
+						oi[0].num++;
+						have = NULL;
+
+						DTUnitSuccess* u = (DTUnitSuccess*)unit[targetUnit];
+						u->exe++;
+					}
+					sm = StateMoveReady;
+					exe++;
+				}
+			} 
+		}
 	}
 }
 
@@ -859,16 +1074,38 @@ DTUnitSuccess::DTUnitSuccess(int index) : DTUnit(index)
 
 	img = imgs[0];
 	delete imgs;
+
+	_haveNum = 100;
+	have = new DTItem * [_haveNum];
+	memset(have, 0x00, sizeof(DTItem*) * _haveNum);
+	haveNum = 0;
 }
 
 DTUnitSuccess::~DTUnitSuccess()
 {
+	delete have;
 	// 슈퍼클래스에서 파괴할것임
 }
 
 void DTUnitSuccess::paint(float dt, iPoint position)
 {
-	img->paint(dt, this->position + position);
+	iPoint p = this->position + position;
+	img->paint(dt, p);
+
+	displaySida(dt, position);
+
+	p.x += img->position.x;
+	// 생산재료
+	for (int i = 0; i < haveNum; i++)
+	{
+		setRGBA(0, 0, 0, 1);
+		fillRect(p.x + 12 * i, p.y + 5, 10, 10);
+		if (have[i])
+		{
+			setRGBA(1, 1, 0, 1);
+			fillRect(p.x + 1 + 12 * i, p.y + 1 + 5, 8, 8);
+		}
+	}
 }
 
 // ===========================
@@ -900,6 +1137,7 @@ DTUnitFail::~DTUnitFail()
 void DTUnitFail::paint(float dt, iPoint position)
 {
 	img->paint(dt, this->position + position);
+	displaySida(dt, position);
 }
 
 iImage** createRobot(

@@ -183,8 +183,20 @@ Texture* methodStOrder(const char* str)
 
 void drawDTProcUI(float dt)
 {
+	int total = 0, curr = 0;
+	for (int i = 0; i < oiNumBk; i++)
+	{
+		total += oiBk[i]._num;
+	}
+
+	for (int i = 0; i < oiNum; i++)
+	{
+		total += oi[i]._num;
+		curr += oi[i].num;
+	}
+
 	stProcUI[0]->set("총 수주 개수 : %d개 완료 개수 : %d개, 공정 개수 : %d개",
-		pd->target, pd->made, curr);
+		total, complete, curr);
 	stProcUI[1]->set("총 접속 시간 : %.0fs 현재 접속 시간 : %.0fs",
 		pd->playTimeTotal / 1000.0f,
 		(GetTickCount() - pd->playTimeCurr) / 1000.0f);
@@ -223,15 +235,17 @@ bool keyDTProcUI(iKeyStat stat, iPoint point)
 				orderPD = 5;
 		}
 		else if (i == 2)
-			orderNum += 1;
+			orderNum += 5;
 		else if (i == 3)
 		{
-			orderNum -= 1;
+			orderNum -= 5;
 			if (orderNum < 0)
 				orderNum = 0;
 		}
 		else //if (i == 4)
 		{
+			// 1 -> 5
+			// 3 -> 1
 			printf("주문 하기 %d\n", orderNum);
 			startMake(orderPD, orderNum);
 			orderNum = 0;

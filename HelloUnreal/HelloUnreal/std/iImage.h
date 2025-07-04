@@ -24,6 +24,7 @@ public:
 
 	iRect touchRect(iPoint position = iPointZero);
 	
+	iImage* copy();
 public:
 	// 텍스처 0 1 2 있다면 012순서대로 재생
 	iArray* array; // 텍스처들 리스트에 보관

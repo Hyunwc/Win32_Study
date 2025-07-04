@@ -10,7 +10,7 @@
 // 디스플레이 
 // 생산률 complete / target
 // 진행률 curr / target
-extern int target, curr, complete, broken;
+extern int curr, complete, broken;
 
 enum Material
 {
@@ -51,6 +51,21 @@ void freeDTObject();
 void drawDTObject(float dt, iPoint off);
 bool keyDTObject(iKeyStat stat, iPoint point);
 
+struct OrderInfo
+{
+	int pd;
+	int num, _num; // _num : 주문받은 개수
+};
+
+extern OrderInfo* oi;
+extern int oiNum;
+#define oiMax 100
+
+extern iShortestPath* dtsp;
+
+extern OrderInfo* oiBk;
+extern int oiNumBk;
+
 // DTProcUI에서 쓰기위함
 void startMake(int orderPD, int orderNum);
 
@@ -63,6 +78,7 @@ struct DTUnit
 
 	virtual bool start(MethodWorked m); // 생산시작을 알려줘
 	virtual void paint(float dt, iPoint position) = 0;
+	void displaySida(float dt, iPoint position);
 
 	float run(float dt);
 	// 파라미터 : offset(스크롤된 값)
@@ -79,6 +95,11 @@ struct DTUnit
 	iPoint position; 
 	// 수행시간
 	float delta, _delta; 
+	// 수리로봇이 도착지
+	iPoint positionSida;
+
+	// 몇번 실행됐는지
+	int exe;
 
 	MethodWorked methodWorked;
 };
@@ -170,6 +191,10 @@ struct DTUnitSida : DTUnit
 
 	iPoint* path;
 	int pathIndex, pathNum;
+	float speed;
+
+	int targetUnit;
+	DTItem* have;
 
 	DTUnitSida(int index);
 	virtual ~DTUnitSida();
@@ -184,6 +209,9 @@ extern iShortestPath* dtsp;
 // index : 300 ~ 399
 struct DTUnitSuccess : DTUnit
 {
+	DTItem** have;
+	int haveNum, _haveNum;
+
 	DTUnitSuccess(int index);
 	virtual ~DTUnitSuccess();
 

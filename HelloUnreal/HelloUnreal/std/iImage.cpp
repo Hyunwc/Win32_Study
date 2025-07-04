@@ -78,3 +78,18 @@ iRect iImage::touchRect(iPoint position)
 	iPoint p = this->position + position;
 	return iRectMake(p.x, p.y, tex->width, tex->height);	
 }
+
+iImage* iImage::copy()
+{
+	iImage* img = new iImage();
+	iArray* a = img->array; // 백업
+	memcpy(img, this, sizeof(iImage));
+	img->array = a; // 복구
+
+	for (int i = 0; i < array->count; i++)
+	{
+		img->add((Texture*)array->at(i));
+	}
+
+	return img;
+}
