@@ -207,6 +207,7 @@ void freePopUnit()
 		delete popUnit[i];
 		delete stUnitBg[i];
 	}
+
 	delete popUnit;
 	delete stUnitBg;
 	delete imgUnitBtn;
