@@ -143,15 +143,12 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
+HWND* hBtn;
+HWND hList;
+HWND* hEdit;
+HWND hEditMulti;
 
-HWND hBtn, hBtn2, hCheck, hCombo, hList;
-void methodBtn(HWND hwnd);
-void methodCombo(HWND hwnd);
-void methodList(HWND hwnd);
-HWND* hRadio;
-void methodRadio(HWND hwnd);
-void methodEdit(HWND hwnd);
-void methodEditMulti(HWND hwnd);
+iArray* array;
 
 void loadApp(HWND hwnd)
 {
@@ -160,92 +157,177 @@ void loadApp(HWND hwnd)
 
     loadCtrl();
 
-    createWndStatic(30, 30, 100, 25, methodBtn, "테스트");
-
-    hBtn = createWndButton(30, 60, 100, 25, methodBtn, "푸시버튼");
-    hBtn2 = createWndButton(170, 60, 100, 25, methodBtn, "푸시버튼");
-
-    hCheck = createWndCheckBox(30, 90, 100, 25, methodBtn, "체크박스");
-
-    const char* str[10] = { "임수아", "김성민", "조상현", "정우주",
-    "송지호", "김재학", "함동희", "김태현", "진정우", "최병철" };
-    hCombo = createWndComboBox(30, 120, 100, 300, methodCombo, str, 10);
-    hList = createWndListBox(230, 120, 100, 100, methodList, str, 10);
-
-    hRadio = new HWND[5];
-    const char* strSatis[5] = { "아주만족", "만족", "보통", "불만족", "아주불만족"};
+    const char* strBtn[5] = { "로드", "저장", "추가", "업뎃", "삭제" };
+    hBtn = new HWND[5];
     for (int i = 0; i < 5; i++)
     {
-        hRadio[i] = createWndRadio(30, 230 + 27 * i,
-            120, 25, methodRadio, strSatis[i]);
+        hBtn[i] = createWndButton(10 + 55 * i, 10, 50, 30,
+            methodBtn, strBtn[i]);
     }
 
-    createWndEdit(300, 60, 100, 22, WndEditInt, methodEdit, "1234");
-    createWndEditMultiline(400, 60, 100, 150,  methodEditMulti, "1234");
-}
+    const char* strList[1] = { "End of List", };
+    hList = createWndListBox(10, 45, 150, 150, methodList, strList, 1);
 
-void methodBtn(HWND hwnd)
-{
-    HWND h[3] = { hBtn, hBtn2, hCheck };
-    for (int i = 0; i < 3; i++)
-    {
-        if(h[i] == hwnd)
-            printf("hwnd[%d] = %d\n", i);
-    }
-
-    if (hwnd == hBtn)
-    {
-        const char* path = 
-        openFileDlg(true, ITEM_FILTER);
-        printf("path[%s]\n", path);
-    }
-    else if (hwnd == hBtn2)
-    {
-        const char* path =
-        openFileDlg(false, ITEM_FILTER);
-
-        printf("path[%s]\n", path);
-    }
-}
-
-void methodCombo(HWND hwnd)
-{
-    printf("combo = %d\n", indexWndComboBox(hwnd));
-}
-
-void methodList(HWND hwnd)
-{
-    printf("list = %d\n", indexWndListBox(hwnd));
-}
-
-void methodRadio(HWND hwnd)
-{
+    const char* strInfo[5] = { "이름", "HP", "MP", "ATK", "DEF"};
+    hEdit = new HWND[5];
     for (int i = 0; i < 5; i++)
     {
-        setWndRadio(hRadio[i], hRadio[i] == hwnd);
+        createWndStatic(170, 45 + 30 * i, 50, 25, NULL, strInfo[i]);
+        hEdit[i] = createWndEdit(225, 45 + 30 * i, 50, 25,
+            i == 0 ? WndEditAll : WndEditInt, methodEdit, "0");
     }
-}
 
-void methodEdit(HWND hwnd)
-{
-    char* str = getWndText(hwnd);
-    printf("edit[%s]\n", str);
-    delete str;
-}
+    hEditMulti = createWndEditMultiline(10, 200, 270, 50,
+        methodEdit, "설명");
 
-void methodEditMulti(HWND hwnd)
-{
-    char* str = getWndText(hwnd);
-    printf("edit[%s]\n", str);
-    delete str;
+    array = new iArray(methodArray);
 }
 
 void freeApp()
 {
     freeCtrl();
+
+    delete hBtn;
+    delete hEdit;
+    delete array;
 }
 
 void drawApp(float dt)
 {
 
 }
+
+void methodBtn(HWND hwnd)
+{
+    int i;
+    for (i = 0; i < 5; i++)
+    {
+        if (hBtn[i] == hwnd)
+            break;
+    }
+
+    const char* strBtn[5] = { "로드", "저장", "추가", "업뎃", "삭제" };
+    printf("btn = %s\n", strBtn[i]);
+    if (i == 0)
+    {
+        const char* path = openFileDlg(true, ITEM_FILTER);
+        if (path)
+        {
+            FILE* pf = fopen(path, "rb");
+            int num;
+            fread(&num, sizeof(int), 1, pf);
+            for (int i = 0; i < num; i++)
+            {
+                Item* item = new Item;
+                int len;
+                fread(&len, sizeof(int), 1, pf);
+                char* s = new char[len + 1];
+                fread(s, sizeof(char), len, pf);
+                s[len] = 0;
+                item->name = s;           
+                fread(&item->hp, sizeof(int), 1, pf);
+                fread(&item->mp, sizeof(int), 1, pf);
+                fread(&item->atk, sizeof(int), 1, pf);
+                fread(&item->def, sizeof(int), 1, pf);
+                fread(&len, sizeof(int), 1, pf);
+                s = new char[len + 1];
+                fread(s, sizeof(char), len, pf);
+                s[len] = 0;
+                item->exp = s;
+                array->add(item);
+
+                addWndListBox(hList, i, item->name);
+            }
+
+            fclose(pf);
+        }
+    }
+    else if (i == 1)
+    {
+        const char* path = openFileDlg(false, ITEM_FILTER);
+        if (path)
+        {
+            FILE* pf = fopen(path, "wb");
+            fwrite(&array->count, sizeof(int), 1, pf);
+            for (int i = 0; i < array->count; i++)
+            {
+                Item* item = (Item*)array->at(i);
+                int len = strlen(item->name);
+                fwrite(&len, sizeof(int), 1, pf);
+                fwrite(item->name, sizeof(char), len, pf);
+                fwrite(&item->hp, sizeof(int), 1, pf);
+                fwrite(&item->mp, sizeof(int), 1, pf);
+                fwrite(&item->atk, sizeof(int), 1, pf);
+                fwrite(&item->def, sizeof(int), 1, pf);
+                len = strlen(item->exp);
+                fwrite(&len, sizeof(int), 1, pf);
+                fwrite(item->exp, sizeof(char), len, pf);
+            }
+            fclose(pf);
+        }
+    }
+    else if (i == 2)
+    {
+        char* name = getWndText(hEdit[0]);
+        int index = indexWndListBox(hList);
+        addWndListBox(hList, index, name);
+        setWndListBox(hList, index);
+
+        Item* item = new Item;
+        item->name = name;
+        item->hp = getWndInt(hEdit[1]);
+        item->mp = getWndInt(hEdit[2]);
+        item->atk = getWndInt(hEdit[3]);
+        item->def = getWndInt(hEdit[4]);
+        item->exp = getWndText(hEditMulti);
+        array->add(index, item);
+    }
+    else if (i == 3)
+    {
+        int index = indexWndListBox(hList);
+        Item* item = (Item*)array->at(index);
+        delete item->name;
+        item->name = getWndText(hEdit[0]);
+        item->hp = getWndInt(hEdit[1]);
+        item->mp = getWndInt(hEdit[2]);
+        item->atk = getWndInt(hEdit[3]);
+        item->def = getWndInt(hEdit[4]);
+        item->exp = getWndText(hEditMulti);
+    }
+    else if (i == 4)
+    {
+
+    }
+}
+
+void methodList(HWND hwnd)
+{
+    int index = indexWndListBox(hList);
+    int count = countWndListBox(hList);
+    if (index == count - 1)
+        return;
+
+    Item* item = (Item*)array->at(index);
+    setWndText(hEdit[0], item->name);
+    setWndText(hEdit[1], "%d", item->hp);
+    setWndText(hEdit[2], "%d", item->mp);
+    setWndText(hEdit[3], "%d", item->atk);
+    setWndText(hEdit[4], "%d", item->def);
+    setWndText(hEditMulti, item->exp);
+}
+
+void methodEdit(HWND hwnd)
+{
+}
+
+void methodEditMulti(HWND hwnd)
+{
+}
+
+void methodArray(void* data)
+{
+    Item* i = (Item*)data;
+    delete i->name;
+    delete i;
+}
+
